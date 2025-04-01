@@ -9,16 +9,14 @@ export const getAnalytics = async (userId: string) => {
       },
       select: {
         title: true,
-        price: true,
       },
     });
 
-    const totalRevenue = courses.reduce((acc, course) => acc + (course.price || 0), 0);
+    const totalRevenue = courses.reduce((acc, course) => acc, 0);
 
     return {
       data: courses.map((course) => ({
         name: course.title,
-        total: course.price || 0,
       })),
       totalRevenue,
     };
