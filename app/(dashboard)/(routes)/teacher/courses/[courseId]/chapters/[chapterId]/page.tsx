@@ -9,6 +9,7 @@ import { ChapterTitleForm } from './components/chapter-title-form';
 import { ChapterDescriptionForm } from './components/chapter-description-form';
 import { ChapterAccessForm } from './components/chapter-access-form';
 import { ChapterVideoForm } from './components/chapter-video-form';
+import { ChapterImageForm } from './components/chapter-image-form';
 import { Banner } from '@/components/banner';
 import { ChapterActions } from './components/chapter-actions';
 
@@ -36,7 +37,7 @@ const ChapterIdPage = async ({
     return redirect('/');
   }
 
-  const requiredFields = [chapter.title, chapter.description, chapter.videoUrl];
+  const requiredFields = [chapter.title, chapter.description];
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
   const completionText = `(${completedFields}/${totalFields})`;
@@ -115,6 +116,12 @@ const ChapterIdPage = async ({
               chapterId={params.chapterId}
               courseId={params.courseId}
             />
+            <ChapterImageForm
+              initialData={chapter}
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+            />
+            
           </div>
         </div>
       </div>

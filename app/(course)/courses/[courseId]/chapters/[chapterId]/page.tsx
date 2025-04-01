@@ -9,6 +9,8 @@ import { auth } from '@clerk/nextjs';
 import { CourseEnrollButton } from './components/course-enroll-button';
 import { CourseProgressButton } from './components/course-progress-button';
 import { VideoPlayer } from './components/video-player';
+import { ImagePlayer } from './components/image-player';
+
 
 const ChapterIdPage = async ({
   params,
@@ -28,7 +30,7 @@ const ChapterIdPage = async ({
     course,
     muxData,
     nextChapter,
-    purchase,
+    enrollment,
     userProgress,
   } = await getChapter({
     userId,
@@ -40,8 +42,8 @@ const ChapterIdPage = async ({
     return redirect('/');
   }
 
-  const isLocked = !chapter.isFree && !purchase;
-  const completeOnEnd = !!purchase && !userProgress?.isCompleted;
+  const isLocked = !chapter.isFree && !enrollment;
+  const completeOnEnd = !!enrollment && !userProgress?.isCompleted;
   console.log(attachments);
   return (
     <div>
@@ -56,20 +58,21 @@ const ChapterIdPage = async ({
       )}
       <div className="flex flex-col max-w-4xl pb-20 mx-auto">
         <div className="p-4">
-          <VideoPlayer
+          <ImagePlayer
             chapterId={params.chapterId}
             title={chapter.title}
             courseId={params.courseId}
             nextChapterId={nextChapter?.id}
-            playbackId={muxData?.playbackId!}
+            imageUrl={chapter.imageUrl!} // Ensure imageUrl is passed
             isLocked={isLocked}
             completeOnEnd={completeOnEnd}
           />
+          
         </div>
         <div>
           <div className="flex flex-col items-center justify-between p-4 md:flex-row">
             <h2 className="mb-2 text-2xl font-semibold">{chapter.title}</h2>
-            {purchase ? (
+            {enrollment ? (
               <CourseProgressButton
                 chapterId={params.chapterId}
                 courseId={params.courseId}
@@ -78,9 +81,7 @@ const ChapterIdPage = async ({
               />
             ) : (
               <CourseEnrollButton
-                courseId={params.courseId}
-                price={course.price!}
-              />
+                  courseId={params.courseId} price={0}              />
             )}
           </div>
           <Separator />

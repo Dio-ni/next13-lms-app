@@ -11,7 +11,7 @@ interface CourseEnrollButtonProps {
   price: number;
   courseId: string;
 }
-const CourseEnrollButton = ({ courseId, price }: CourseEnrollButtonProps) => {
+const CourseEnrollButton = ({ courseId }: CourseEnrollButtonProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onClick = async () => {
@@ -35,7 +35,7 @@ const CourseEnrollButton = ({ courseId, price }: CourseEnrollButtonProps) => {
       size="sm"
       className="w-full md:w-auto"
     >
-      Enroll for {formatPrice(price)}
+      Enroll 
     </Button>
   );
 };
