@@ -14,7 +14,6 @@ import { CategoryForm } from './components/category-form';
 import { DescriptionForm } from './components/description-form';
 import { ImageForm } from './components/image-form';
 import { TitleForm } from './components/title-form';
-import { PriceForm } from './components/price-form';
 import { AttachmentForm } from './components/attachment-form';
 import { ChaptersForm } from './components/chapters-form';
 import { Banner } from '@/components/banner';
