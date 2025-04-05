@@ -14,11 +14,13 @@ import {
   ChevronRight,
   PlayCircle,
   X,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/components/providers/sidebar-provider";
+import { getCompletedLessons } from "@/actions/getCompletedLessons";
 import { useEffect, useState } from "react";
 import {
   Tooltip,
@@ -29,6 +31,7 @@ import {
 import { CourseProgress } from "@/components/CourseProgress";
 import { calculateCourseProgress } from "@/actions/calculateCourseProgress";
 import { Category, Chapter, Course, Lesson } from "@prisma/client";
+import { compileFunction } from "vm";
 
 type CourseWithDetails = {
   id: string;
@@ -49,10 +52,13 @@ interface SidebarProps {
 }
 
 export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
+  
   const pathname = usePathname();
   const { isOpen, toggle, close } = useSidebar();
   const [isMounted, setIsMounted] = useState(false);
   const [openModules, setOpenModules] = useState<string[]>([]);
+  const [progress,setProgress] = useState(0);
+
 
   // Sync the opened modules with the pathname
   useEffect(() => {
@@ -66,6 +72,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
         setOpenModules((prev) => [...prev, currentChapterId]);
       }
     }
+    setProgress(calculateCourseProgress(course.chapters, completedLessons));
   }, [pathname, course, openModules]);
 
   useEffect(() => {
@@ -75,16 +82,18 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
   if (!course || !isMounted) {
     return null;
   }
+  
+  console.log(completedLessons)
+
 
   // Calculate the course progress based on the provided chapters and completed lessons
-  const progress = calculateCourseProgress(course.chapters, completedLessons);
-
+  
   const SidebarContent = () => (
     <div className="h-full flex flex-col">
       <div className="p-4 lg:p-6 border-b flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
           <Link
-            href="/my-courses"
+            href="/user/my-courses"
             className="flex items-center gap-x-2 text-sm hover:text-primary transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -106,11 +115,11 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
         </div>
         <div className="space-y-4">
           <h1 className="font-semibold text-2xl">{course.title}</h1>
-          <CourseProgress
+          {/* <CourseProgress
             progress={progress}
             variant="success"
             label="Course Progress"
-          />
+          /> */}
         </div>
       </div>
       <ScrollArea className="flex-1">
@@ -142,27 +151,56 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
                 </AccordionTrigger>
                 <AccordionContent className="pt-2">
                   <div className="flex flex-col space-y-1">
-                    {chapter.lessons?.map((lesson, lessonIndex) => (
-                      <Link
+                    {chapter.lessons?.map((lesson, lessonIndex) => {
+                      const isActive =
+                      pathname ===
+                      `/dashboard/courses/${course.id}/lessons/${lesson.id}`;
+                    const isCompleted = completedLessons.some(
+                      (completion) => completion?.id === lesson.id
+                    );
+
+                    return (
+                        <Link
                         key={lesson.id}
                         prefetch={false}
                         href={`/dashboard/courses/${course.id}/lessons/${lesson.id}`}
                         onClick={close}
                         className={cn(
-                          "flex items-center pl-8 lg:pl-10 pr-2 lg:pr-4 py-2 gap-x-2 lg:gap-x-4 group hover:bg-muted/50 transition-colors relative"
+                          "flex items-center pl-8 lg:pl-10 pr-2 lg:pr-4 py-2 gap-x-2 lg:gap-x-4 group hover:bg-muted/50 transition-colors relative",
+                          isActive && "bg-muted",
+                          isCompleted && "text-muted-foreground"
                         )}
                       >
                         <span className="text-xs font-medium text-muted-foreground min-w-[28px]">
                           {String(lessonIndex + 1).padStart(2, "0")}
                         </span>
-                        <PlayCircle
-                          className={cn(
-                            "h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary/80"
-                          )}
-                        />
-                        <span className="text-sm line-clamp-2 min-w-0">{lesson.title}</span>
-                      </Link>
-                    ))}
+                        {isCompleted ? (
+                              <Check className="h-4 w-4 shrink-0 text-green-500" />
+                            ) : (
+                              <PlayCircle
+                                className={cn(
+                                  "h-4 w-4 shrink-0",
+                                  isActive
+                                    ? "text-primary"
+                                    : "text-muted-foreground group-hover:text-primary/80"
+                                )}
+                              />
+                            )}
+                            <span
+                              className={cn(
+                                "text-sm line-clamp-2 min-w-0",
+                                isCompleted &&
+                                  "text-muted-foreground line-through decoration-green-500/50"
+                              )}
+                            >
+                              {lesson.title}
+                            </span>
+                            {isActive && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-primary" />
+                            )}
+                            </Link>
+                    );
+                  })};
                   </div>
                 </AccordionContent>
               </AccordionItem>

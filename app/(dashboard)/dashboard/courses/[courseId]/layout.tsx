@@ -40,6 +40,7 @@ export default async function CourseLayout({
   if (!course) {
     return redirect("/user");
   }
+  console.log(progress.completedLessons)
 
   return (
     <div className="h-full">

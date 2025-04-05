@@ -4,19 +4,16 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { completeLessonAction } from "@/actions/completeLessonAction";
-import { uncompleteLessonAction } from "@/actions/uncompleteLessonAction";
-import { getLessonCompletionStatusAction } from "@/actions/getLessonCompletionStatusAction";
 import { cn } from "@/lib/utils";
 
 interface LessonCompleteButtonProps {
+  courseId: string;
   lessonId: string;
-  clerkId: string;
 }
 
 export function LessonCompleteButton({
+  courseId,
   lessonId,
-  clerkId,
 }: LessonCompleteButtonProps) {
   const [isPending, setIsPending] = useState(false);
   const [isCompleted, setIsCompleted] = useState<boolean | null>(null);
@@ -24,32 +21,38 @@ export function LessonCompleteButton({
   const router = useRouter();
 
   useEffect(() => {
-    startTransition(async () => {
+    const fetchStatus = async () => {
       try {
-        const status = await getLessonCompletionStatusAction(lessonId, clerkId);
-        setIsCompleted(status);
+        const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`, {
+          method: "GET",
+        });
+        const data = await res.json();
+        setIsCompleted(data?.isCompleted ?? false);
       } catch (error) {
-        console.error("Error checking lesson completion status:", error);
+        console.error("Error fetching lesson completion status:", error);
         setIsCompleted(false);
       }
-    });
-  }, [lessonId, clerkId]);
+    };
+
+    startTransition(fetchStatus);
+  }, [lessonId, courseId]);
 
   const handleToggle = async () => {
     try {
       setIsPending(true);
-      if (isCompleted) {
-        await uncompleteLessonAction(lessonId, clerkId);
-      } else {
-        await completeLessonAction(lessonId, clerkId);
-      }
+
+      await fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isCompleted: !isCompleted }),
+      });
 
       startTransition(async () => {
-        const newStatus = await getLessonCompletionStatusAction(
-          lessonId,
-          clerkId
-        );
-        setIsCompleted(newStatus);
+        const res = await fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`);
+        const data = await res.json();
+        setIsCompleted(data?.isCompleted ?? false);
       });
 
       router.refresh();

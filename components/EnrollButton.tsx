@@ -9,11 +9,9 @@ import { enrollUserInCourse } from "@/actions/enrollUserInCourse";  // Import th
 function EnrollButton({
   courseId,
   isEnrolled,
-  userId,
 }: {
   courseId: string;
   isEnrolled: boolean;
-  userId:string | null;
 }) {
   const { user, isLoaded: isUserLoaded } = useUser();
   const router = useRouter(); // Router hook to handle redirects
@@ -43,20 +41,47 @@ function EnrollButton({
   }
 
   // Handle enroll button click
+  // const handleEnrollClick = async () => {
+  //   if (user?.id) {
+  //     try {
+  //       await enrollUserInCourse(user?.id, courseId);  // Enroll the user
+  //       router.push(`/dashboard/courses/${courseId}`);  // Redirect after successful enrollment
+  //     } catch (error) {
+  //       // Handle error (e.g., show a notification or alert)
+  //       console.log(error);
+  //     }
+  //   } else {
+  //     // Handle case where user is not signed in
+  //     alert("Please sign in to enroll in the course.");
+  //   }
+  // };
+
   const handleEnrollClick = async () => {
-    if (userId) {
-      try {
-        await enrollUserInCourse(userId, courseId);  // Enroll the user
-        router.push(`/dashboard/courses/${courseId}`);  // Redirect after successful enrollment
-      } catch (error) {
-        // Handle error (e.g., show a notification or alert)
-        console.error(error);
-      }
-    } else {
-      // Handle case where user is not signed in
+    if (!user?.id) {
       alert("Please sign in to enroll in the course.");
+      return;
     }
+  
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/courses/${courseId}/enroll`, {
+          method: "POST",
+        });
+  
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Unknown error");
+        }
+  
+        router.push(`/dashboard/courses/${courseId}`);
+      } catch (error: any) {
+        console.error("Enrollment error:", error);
+        alert("Failed to enroll: " + error.message);
+      }
+    });
   };
+
+  
 
   // Show enroll button only when we're sure user is not enrolled
   return (

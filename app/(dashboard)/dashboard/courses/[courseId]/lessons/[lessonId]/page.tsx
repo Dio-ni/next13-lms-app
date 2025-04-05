@@ -26,9 +26,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   // If user is null, redirect to login or show an error message
-  if (!userId) {
-    return redirect("/user"); // or show a custom message like "Please log in"
-  }
+  // if (!userId) {
+  //   return redirect("/user"); // or show a custom message like "Please log in"
+  // }
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -45,7 +45,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             {lesson.videoUrl && <VideoPlayer url={lesson.videoUrl} />}
 
             {/* Loom Embed Video if loomUrl is provided */}
-            {/* {lesson.loomUrl && <LoomEmbed shareUrl={lesson.loomUrl} />} */}
+            {/* {lesson.videoUrl && <LoomEmbed shareUrl={lesson.videoUrl} />} */}
 
             {/* Lesson Content */}
             {lesson.content && (
@@ -61,7 +61,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             {/* Only show the LessonCompleteButton if the user is authenticated */}
             {userId && (
               <div className="flex justify-end">
-                <LessonCompleteButton lessonId={lesson.id} clerkId={userId} />
+                <LessonCompleteButton lessonId={lesson.id} courseId={courseId} />
               </div>
             )}
           </div>

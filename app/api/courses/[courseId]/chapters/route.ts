@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs';
-
 import { db } from '@/lib/db';
 
 export async function POST(
@@ -13,7 +12,11 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
+    // Parse the incoming request body and ensure we have a title
     const { title } = await req.json();
+    if (!title || title.trim() === '') {
+      return new NextResponse('Title is required', { status: 400 });
+    }
 
     const courseOwner = await db.course.findUnique({
       where: {
@@ -36,6 +39,7 @@ export async function POST(
     });
 
     const newPosition = lastChapter ? lastChapter.position + 1 : 1;
+
     const chapter = await db.chapter.create({
       data: {
         title,
@@ -43,9 +47,10 @@ export async function POST(
         position: newPosition,
       },
     });
+
     return NextResponse.json(chapter);
   } catch (error) {
-    console.log('[CHAPTERS]', error);
+    console.error('[CHAPTERS_CREATE_ERROR]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

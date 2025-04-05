@@ -3,9 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import EnrollButton from "@/components/EnrollButton";
-// import { auth } from "@clerk/nextjs/server";
 import { isEnrolledInCourse } from "@/actions/isEnrolledInCourse";
-import { auth } from '@clerk/nextjs';
+import { currentUser } from "@clerk/nextjs/server"; 
 
 interface CoursePageProps {
   params: Promise<{
@@ -53,12 +52,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   // Authentication and enrollment check
-  const { userId } = await auth();
+  const user  = await currentUser();
   const isEnrolled =
-    userId && course.id
-      ? await isEnrolledInCourse(userId, course.id) // Adjust function to check based on your schema
+    user?.id && course.id
+      ? await isEnrolledInCourse(user?.id, course.id) // Adjust function to check based on your schema
       : false;
-    console.log(userId)
+    console.log(isEnrolled)
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -100,7 +99,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               <div className="text-3xl font-bold text-white mb-4">
                 Free
               </div>
-              <EnrollButton courseId={course.id} isEnrolled={isEnrolled} userId={userId} />
+              <EnrollButton courseId={course.id} isEnrolled={isEnrolled}  />
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ export async function PATCH(
     if (
       !chapter ||
       !chapter.title ||
-      !chapter.position
+      !chapter.description
     ) {
       return new NextResponse('Missing required fields', { status: 400 });
     }

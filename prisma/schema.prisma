@@ -55,6 +55,7 @@ model Lesson {
   title      String
   content    String?  @db.Text
   videoUrl   String?  @db.Text
+  imageUrl   String?  @db.Text
   chapterId  String
 
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)

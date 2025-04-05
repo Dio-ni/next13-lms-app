@@ -12,16 +12,13 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Check if the user owns the course
     const courseOwner = await db.course.findUnique({
       where: { id: params.courseId, userId },
     });
-
     if (!courseOwner) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Find the chapter
     const chapter = await db.chapter.findUnique({
       where: { id: params.chapterId, courseId: params.courseId },
     });
@@ -30,24 +27,31 @@ export async function PATCH(
       return new NextResponse('Not Found', { status: 404 });
     }
 
-    // Check for required fields (excluding videoUrl and imageUrl)
-    if (
-      !chapter ||
-      !chapter.title ||
-      !chapter.position
-    ) {
-      return new NextResponse('Missing required fields', { status: 400 });
-    }
-
-    // Publish the chapter
     const updatedChapter = await db.chapter.update({
       where: { id: params.chapterId, courseId: params.courseId },
-      data: { isPublished: true },
+      data: { isPublished: false },
     });
+    const publishedChaptersInCourse = await db.chapter.findMany({
+      where: {
+        courseId: params.courseId,
+        isPublished: true,
+      },
+    });
+
+    if (!publishedChaptersInCourse.length) {
+      await db.course.update({
+        where: {
+          id: params.courseId,
+        },
+        data: {
+          isPublished: false,
+        },
+      });
+    }
 
     return NextResponse.json(updatedChapter);
   } catch (error) {
-    console.log('[CHAPTER_PUBLISH]', error);
+    console.log('[CHAPTER_UNPUBLISH]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

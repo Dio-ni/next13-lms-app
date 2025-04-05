@@ -11,7 +11,7 @@ export function SearchInput() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search/${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/user/search/${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

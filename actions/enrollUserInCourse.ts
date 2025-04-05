@@ -1,6 +1,7 @@
-import { db } from "@/lib/db";  // Assuming your Prisma DB instance is imported here
+'use server';
 
-// enrollUserInCourse function
+import { db } from "@/lib/db";
+
 export async function enrollUserInCourse(userId: string, courseId: string) {
   try {
     const course = await db.course.findUnique({
@@ -19,7 +20,7 @@ export async function enrollUserInCourse(userId: string, courseId: string) {
     });
 
     if (existingEnrollment) {
-      throw new Error("You are already enrolled in this course");
+      throw new Error("Already enrolled");
     }
 
     await db.enrollment.create({
@@ -28,9 +29,9 @@ export async function enrollUserInCourse(userId: string, courseId: string) {
         courseId,
       },
     });
-    console.log(userId,courseId)
+
+    return { success: true };
   } catch (error) {
-    
     console.error("Error enrolling user:", error);
     throw new Error("Enrollment failed");
   }
