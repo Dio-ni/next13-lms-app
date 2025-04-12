@@ -2,26 +2,24 @@ import { redirect } from "next/navigation";
 import { getCourseById } from "@/actions/getCourseById";
 
 interface CoursePageProps {
-  params: Promise<{
+  params: {
     courseId: string;
-  }>;
+  };
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  const { courseId } = await params;
+  const { courseId } = params;
   const course = await getCourseById(courseId);
 
   if (!course) {
-    // If the course is not found, redirect to the homepage
     return redirect("/user");
   }
 
-  // Check if there are modules and lessons in the course
-  
-  if (course.chapters?.[0]?.lessons?.[0]?.id) {
-    return redirect(
-      `/dashboard/courses/${courseId}/lessons/${course.chapters[0].lessons[0].id}`
-    );
+  // Find the first available lesson in the course
+  const firstLessonId = course.modules?.[0]?.chapters?.[0]?.lessons?.[0]?.id;
+
+  if (firstLessonId) {
+    return redirect(`/dashboard/courses/${courseId}/lessons/${firstLessonId}`);
   }
 
   return (

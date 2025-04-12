@@ -1,30 +1,46 @@
-import { db } from "@/lib/db"; // Assuming you have a Prisma client instance
+import { db } from "@/lib/db";
 
 // Fetch enrolled courses for a given userId
 export async function getEnrolledCourses(userId: string) {
   try {
-    // Fetch the enrollments for the given userId
     const enrollments = await db.enrollment.findMany({
       where: {
-        userId: userId, // Filter by userId
+        userId: userId,
       },
       include: {
         course: {
           include: {
-            category: true,   // Including related category data
-            chapters: true,   // Optionally including chapters for the course
-            attachments: true, // Optionally including attachments
+            category: true,
+            modules: {
+              include: {
+                chapters: {
+                  include: {
+                    lessons: {
+                      select: {
+                        id: true,
+                        title: true,
+                        content: true,
+                        videoUrl: true,
+                        imageUrl: true,
+                        chapterId: true,
+                        createdAt: true,
+                        updatedAt: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            attachments: true,
           },
         },
       },
     });
 
-    // If no enrollments are found for the given userId
     if (enrollments.length === 0) {
       return [];
     }
 
-    // Return the courses data in a usable format
     return enrollments.map((enrollment) => ({
       course: {
         id: enrollment.course.id,
@@ -32,10 +48,17 @@ export async function getEnrolledCourses(userId: string) {
         description: enrollment.course.description,
         imageUrl: enrollment.course.imageUrl,
         isPublished: enrollment.course.isPublished,
-        category: enrollment.course.category?.name, // Assuming category has a name
-        chapters: enrollment.course.chapters,
+        category: enrollment.course.category?.name,
+        modules: enrollment.course.modules.map((module) => ({
+          id: module.id,
+          title: module.title,
+          chapters: module.chapters.map((chapter) => ({
+            id: chapter.id,
+            title: chapter.title,
+            lessons: chapter.lessons,
+          })),
+        })),
         attachments: enrollment.course.attachments,
-
       },
     }));
   } catch (error) {

@@ -61,7 +61,7 @@ export default async function MyCoursesPage() {
                   id={item.course.id}
                   title={item.course.title}
                   imageUrl={item.course.imageUrl || ""}
-                  chaptersLength={item.course.chapters.length}
+                  modulesLength={item.course.modules.length}
                   progress={null} // Assume you will add progress logic later
                   category={item.course.category || "Uncategorized"}
             />

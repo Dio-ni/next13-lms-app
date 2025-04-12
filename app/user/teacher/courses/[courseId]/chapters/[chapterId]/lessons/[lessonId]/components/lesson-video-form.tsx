@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
+import { Lesson } from '@prisma/client';
 import { Video } from 'lucide-react';
 import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -20,11 +21,10 @@ import {
 import { Input } from '@/components/ui/input';
 
 interface LessonVideoFormProps {
-  initialData: {
-    videoUrl: string;
-  };
+  initialData: Lesson;
   courseId: string;
   lessonId: string;
+  chapterId: string;
 }
 
 const formSchema = z.object({
@@ -35,6 +35,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
   courseId,
   lessonId,
   initialData,
+  chapterId,
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -42,20 +43,39 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      videoUrl: initialData.videoUrl || '', // Fallback to an empty string if videoUrl is null or undefined
+    },
   });
 
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}/lessons/${lessonId}`, values);
+      await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, values);
       toast.success('Video URL updated');
       toggleEdit();
     } catch {
       toast.error('Something went wrong');
     }
   };
+
+  // Function to check if it's a valid YouTube URL and format it
+  const getYouTubeEmbedUrl = (url: string) => {
+    console.log("Checking video URL:", url);  // Log the URL to check
+    const youtubeRegex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:[^\/]+\/\S+\/|(?:v|e(?:mbed)?)\/([a-zA-Z0-9_-]+)|(?:.*[?&]v=)([a-zA-Z0-9_-]+))|youtu\.be\/([a-zA-Z0-9_-]+))/;
+    const match = url.match(youtubeRegex);
+
+    if (match) {
+      const videoId = match[1] || match[2] || match[5];
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+    return null;
+  };
+
+  const videoUrl = initialData.videoUrl ? getYouTubeEmbedUrl(initialData.videoUrl) : null;
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
@@ -93,7 +113,27 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
           </form>
         </Form>
       ) : (
-        <p className="mt-2 text-sm">{initialData.videoUrl}</p>
+        <div className="mt-2 text-sm">
+          {videoUrl ? (
+            <div
+              className="relative w-full"
+              style={{ paddingBottom: '56.25%' }} // 16:9 aspect ratio
+            >
+              <iframe
+                width="100%"
+                height="100%"
+                src={videoUrl}
+                title="Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute top-0 left-0 w-full h-full"
+              ></iframe>
+            </div>
+          ) : (
+            'No video URL available'
+          )}
+        </div>
       )}
     </div>
   );

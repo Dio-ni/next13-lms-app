@@ -9,9 +9,9 @@ import { db } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { LessonTitleForm } from './components/lesson-title-form';
 import { LessonContentForm } from './components/lesson-content-form';
-// import { LessonVideoForm } from './components/lesson-video-form';
+import { LessonVideoForm } from './components/lesson-video-form';
 // // import { LessonVideoForm } from './components/lesson-video-form';
-// import { LessonImageForm } from './components/lesson-image-form';
+import { LessonImageForm } from './components/lesson-image-form';
 
 const LessonIdPage = async ({
   params,
@@ -27,12 +27,7 @@ const LessonIdPage = async ({
     where: {
       id: params.lessonId,
     },
-    select:{
-      id: true,
-      title: true,
-      content:true,
-      videoUrl:true
-    }
+    
   });
 
   if (!lesson) {
@@ -110,17 +105,19 @@ const LessonIdPage = async ({
               <IconBadge icon={Video} />
               <h2 className="text-xl">Add a video</h2>
             </div>
-            {/* <LessonVideoForm
+            <LessonVideoForm
               initialData={lesson}
+              chapterId= {params.chapterId}
               lessonId={params.lessonId}
               courseId={params.courseId}
-            /> */}
+            />
             {/* Lesson Image URL Form */}
-            {/* <LessonImageForm
+            <LessonImageForm
               initialData={lesson}
               lessonId={params.lessonId}
               courseId={params.courseId}
-            /> */}
+              chapterId={params.chapterId}
+            />
           </div>
         </div>
       </div>

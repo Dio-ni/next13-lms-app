@@ -1,11 +1,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Chapter, Course } from '@prisma/client';
+import { Chapter, Course, Module } from '@prisma/client';
 import axios from 'axios';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -25,7 +25,7 @@ import { ChaptersList } from './chapters-list';
 
 interface ChaptersFormProps {
   initialData: Course & {
-    chapters: Chapter[];
+    modules: Module[]; // List of modules attached to the course
   };
   courseId: string;
 }
@@ -38,6 +38,7 @@ const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [chaptersByModule, setChaptersByModule] = useState<{ [key: string]: Chapter[] }>({});
 
   const toggleCreating = () => {
     setIsCreating((prev) => !prev);
@@ -81,6 +82,25 @@ const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
   const onEdit = (id: string) => {
     router.push(`/teacher/courses/${courseId}/chapters/${id}`);
   };
+
+  useEffect(() => {
+    // Fetch chapters for each module on initial render
+    const fetchChapters = async () => {
+      const chaptersData = await Promise.all(
+        initialData.modules.map(async (module) => {
+          const response = await axios.get(`/api/courses/${courseId}/modules/${module.id}/chapters`);
+          return { moduleId: module.id, chapters: response.data };
+        })
+      );
+      const chaptersMap: { [key: string]: Chapter[] } = {};
+      chaptersData.forEach((data) => {
+        chaptersMap[data.moduleId] = data.chapters;
+      });
+      setChaptersByModule(chaptersMap);
+    };
+
+    fetchChapters();
+  }, [courseId, initialData.modules]);
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
@@ -135,18 +155,28 @@ const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
           <div
             className={cn(
               'text-sm mt-2',
-              !initialData.chapters.length && 'text-slate-500 italic'
+              initialData.modules.length === 0 && 'text-slate-500 italic'
             )}
           >
-            {!initialData.chapters.length ? (
-              'No chapters'
+            {initialData.modules.length === 0 ? (
+              'No modules'
             ) : (
-              <ChaptersList
-                courseId={courseId}
-                onEdit={onEdit}
-                onReorder={onReorder}
-                items={initialData.chapters || []}
-              />
+              initialData.modules.map((module) => (
+                <div key={module.id}>
+                  <div className="font-semibold">{module.title}</div>
+                  {/* Render chapters for each module */}
+                  {chaptersByModule[module.id] && chaptersByModule[module.id].length > 0 ? (
+                    <ChaptersList
+                      courseId={courseId}
+                      onEdit={onEdit}
+                      onReorder={onReorder}
+                      items={chaptersByModule[module.id]}
+                    />
+                  ) : (
+                    <p>No chapters</p>
+                  )}
+                </div>
+              ))
             )}
           </div>
 

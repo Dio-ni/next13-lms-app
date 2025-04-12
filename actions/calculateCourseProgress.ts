@@ -1,9 +1,5 @@
-import { Category,  Course } from "@prisma/client";
-
-
-// Fix: Make sure Lesson uses _id instead of id to be consistent with CompletedLesson
 interface Lesson {
-  id: string; // _id instead of id
+  id: string;
   title: string;
   createdAt: Date;
   updatedAt: Date;
@@ -13,31 +9,38 @@ interface Lesson {
 }
 
 interface Chapter {
-  id: string; // `id` for chapters is fine, but lessons inside chapters need _id
-  lessons: Lesson[]; // Lessons should use the correct interface with _id
+  id: string;
+  lessons: Lesson[];
+}
+
+interface Module {
+  id: string;
+  title: string;
+  chapters: Chapter[];
 }
 
 export const calculateCourseProgress = (
-  chapters: Chapter[], // List of chapters in the course
-  completedLessons: { id: string; }[] // List of completed lessons
+  modules: Module[],
+  completedLessons: { id: string }[]
 ): number => {
-  if (chapters.length === 0) {
-    return 0; // If there are no chapters, return 0% progress
+  let totalLessons = 0;
+  let completedCount = 0;
+
+  modules.forEach((module) => {
+    module.chapters.forEach((chapter) => {
+      chapter.lessons.forEach((lesson) => {
+        totalLessons += 1;
+        if (completedLessons.some((cl) => cl.id === lesson.id)) {
+          completedCount += 1;
+        }
+      });
+    });
+  });
+
+  if (totalLessons === 0) {
+    return 0;
   }
 
-  // Count the number of completed chapters
-  const completedChapterCount = chapters.reduce((completedCount, chapter) => {
-    const allLessonsCompleted = chapter.lessons.every((lesson) =>
-      completedLessons.some(
-        (completedLesson) => completedLesson.id === lesson.id // Ensure _id matching
-      )
-    );
-
-    return allLessonsCompleted ? completedCount + 1 : completedCount;
-  }, 0);
-
-  // Calculate progress percentage
-  const progressPercentage = (completedChapterCount / chapters.length) * 100;
-
-  return parseFloat(progressPercentage.toFixed(2)); // Return the progress percentage rounded to 2 decimal places
+  const progress = (completedCount / totalLessons) * 100;
+  return parseFloat(progress.toFixed(2));
 };

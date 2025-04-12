@@ -98,7 +98,6 @@ export async function GET(
 
     return NextResponse.json(lessons);
   } catch (error) {
-    console.log('[LESSONS]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

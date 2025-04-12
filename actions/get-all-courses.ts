@@ -7,7 +7,11 @@ type CourseWithDetails = {
   description: string | null;
   imageUrl: string | null;
   category: Category | null;
-  chapters: { id: string }[];
+  modules: {
+    id: string;
+    title: string;
+    chapters: { id: string }[];
+  }[];
 };
 
 export const getAllCourses = async (): Promise<CourseWithDetails[]> => {
@@ -18,12 +22,13 @@ export const getAllCourses = async (): Promise<CourseWithDetails[]> => {
       },
       include: {
         category: true,
-        chapters: {
-          where: {
-            isPublished: true,
-          },
-          select: {
-            id: true,
+        modules: {
+          include: {
+            chapters: {
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },

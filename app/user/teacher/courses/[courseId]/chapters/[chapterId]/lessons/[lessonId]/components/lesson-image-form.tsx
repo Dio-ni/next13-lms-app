@@ -18,13 +18,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Lesson } from '@prisma/client';
 
 interface LessonImageFormProps {
-  initialData: {
-    imageUrl: string;
-  };
+  initialData: Lesson;
   courseId: string;
   lessonId: string;
+  chapterId: string;
 }
 
 const formSchema = z.object({
@@ -35,6 +35,7 @@ const LessonImageForm: FC<LessonImageFormProps> = ({
   courseId,
   lessonId,
   initialData,
+  chapterId
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -42,14 +43,16 @@ const LessonImageForm: FC<LessonImageFormProps> = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      imageUrl: initialData.imageUrl || '', // Fallback to empty string if imageUrl is null or undefined
+    },
   });
 
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}/lessons/${lessonId}`, values);
+      await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, values);
       toast.success('Image URL updated');
       toggleEdit();
     } catch {
@@ -93,7 +96,17 @@ const LessonImageForm: FC<LessonImageFormProps> = ({
           </form>
         </Form>
       ) : (
-        <p className="mt-2 text-sm">{initialData.imageUrl}</p>
+        <div className="mt-2 text-sm">
+          {initialData.imageUrl ? (
+            <img
+              src={initialData.imageUrl}
+              alt="Lesson Image"
+              className="max-w-full h-auto rounded-md"
+            />
+          ) : (
+            'No image URL available'
+          )}
+        </div>
       )}
     </div>
   );

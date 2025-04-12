@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";  // Prisma database instance
-import { Lesson, Course, Chapter } from "@prisma/client";
+import { Lesson, Course, Chapter, Module } from "@prisma/client";
 
 // Define the shape of the result
 type LessonWithCourseAndChapter = {
@@ -8,7 +8,8 @@ type LessonWithCourseAndChapter = {
   content: string | null;
   videoUrl: string | null;
   chapter: Chapter;
-  course: Course;
+  course: Course | null;  // Make course nullable
+  module: Module | null;  // Make module nullable
 };
 
 export const getLessonById = async (id: string): Promise<LessonWithCourseAndChapter | null> => {
@@ -18,13 +19,17 @@ export const getLessonById = async (id: string): Promise<LessonWithCourseAndChap
       include: {
         chapter: {
           include: {
-            course: true,  // Include the course details
+            module: {  // Include the module details
+              include: {
+                course: true,  // Include the course details
+              },
+            },
           },
         },
       },
     });
 
-    if (!lesson) {
+    if (!lesson || !lesson.chapter.module) {
       return null;
     }
 
@@ -35,7 +40,8 @@ export const getLessonById = async (id: string): Promise<LessonWithCourseAndChap
       content: lesson.content,
       videoUrl: lesson.videoUrl,
       chapter: lesson.chapter,  // Attach chapter details
-      course: lesson.chapter.course,  // Attach course details through the chapter
+      course: lesson.chapter.module?.course || null,  // Attach course details (null-safe)
+      module: lesson.chapter.module,  // Attach module details (null-safe)
     };
 
     return result;

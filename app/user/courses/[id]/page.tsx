@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import EnrollButton from "@/components/EnrollButton";
 import { isEnrolledInCourse } from "@/actions/isEnrolledInCourse";
-import { currentUser } from "@clerk/nextjs/server"; 
+import { currentUser } from "@clerk/nextjs/server";
 
 interface CoursePageProps {
   params: Promise<{
@@ -15,26 +15,30 @@ interface CoursePageProps {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { id } = await params;
 
-  // Query course data
+  // Query course data with modules and chapters
   const course = await db.course.findUnique({
     where: { id },
     include: {
       category: true,
-      chapters: {
-        where: {
-          isPublished: true,
-        },
+      modules: { // First level is modules
         select: {
           id: true,
           title: true,
-          lessons: {
-            where: {
-              // isPublished: true, // Only show published lessons
-            },
+          chapters: { // Each module contains chapters
+            
             select: {
               id: true,
               title: true,
-              content: true,
+              lessons: { // Each chapter contains lessons
+                where: {
+                  // Optional conditions like published lessons
+                },
+                select: {
+                  id: true,
+                  title: true,
+                  content: true,
+                },
+              },
             },
           },
         },
@@ -52,12 +56,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
   }
 
   // Authentication and enrollment check
-  const user  = await currentUser();
+  const user = await currentUser();
   const isEnrolled =
     user?.id && course.id
-      ? await isEnrolledInCourse(user?.id, course.id) // Adjust function to check based on your schema
+      ? await isEnrolledInCourse(user?.id, course.id)
       : false;
-    console.log(isEnrolled)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -96,10 +100,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 md:min-w-[300px]">
-              <div className="text-3xl font-bold text-white mb-4">
-                Free
-              </div>
-              <EnrollButton courseId={course.id} isEnrolled={isEnrolled}  />
+              <div className="text-3xl font-bold text-white mb-4">Free</div>
+              <EnrollButton courseId={course.id} isEnrolled={isEnrolled} />
             </div>
           </div>
         </div>
@@ -113,36 +115,41 @@ export default async function CoursePage({ params }: CoursePageProps) {
             <div className="bg-card rounded-lg p-6 mb-8 border border-border">
               <h2 className="text-2xl font-bold mb-4">Course Content</h2>
               <div className="space-y-4">
-                {course.chapters?.map((chapter, index) => (
-                  <div
-                    key={chapter.id}
-                    className="border border-border rounded-lg"
-                  >
-                    <div className="p-4 border-b border-border">
+                {course.modules?.map((module, index) => (
+                  <div key={module.id} className="">
+                    
                       <h3 className="font-medium">
-                        Chapter {index + 1}: {chapter.title}
+                        Module {index + 1}: {module.title}
                       </h3>
-                    </div>
+                    
 
-                    {/* Lessons */}
-                    <div className="divide-y divide-border">
-                      {chapter.lessons?.map((lesson, lessonIndex) => (
-                        <div
-                          key={lesson.id}
-                          className="p-4 hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">
-                              {lessonIndex + 1}
+                    {/* Chapters within the module */}
+                    {module.chapters?.map((chapter, chapterIndex) => (
+                      <div key={chapter.id} className="border-t border-border p-4">
+                        <h4 className="font-medium">
+                          Chapter {chapterIndex + 1}: {chapter.title}
+                        </h4>
+                        <div className="space-y-2">
+                          {/* Lessons within the chapter */}
+                          {chapter.lessons?.map((lesson, lessonIndex) => (
+                            <div
+                              key={lesson.id}
+                              className="p-4 hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">
+                                  {lessonIndex + 1}
+                                </div>
+                                <div className="flex items-center gap-3 text-foreground">
+                                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                  <span className="font-medium">{lesson.title}</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3 text-foreground">
-                              <BookOpen className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">{lesson.title}</span>
-                            </div>
-                          </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>

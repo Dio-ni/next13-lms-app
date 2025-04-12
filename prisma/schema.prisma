@@ -26,28 +26,47 @@ model Course {
   categoryId  String? 
 
   category   Category? @relation(fields: [categoryId], references: [id])
-  chapters   Chapter[]
+  modules   Module[]
   attachments Attachment[]
   enrollments Enrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+
+
+  Chapter Chapter[]
+}
+
+model Module {
+  id        String   @id @default(uuid())
+  title     String
+  position  Int      @default(0)
+  courseId  String
+
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapters  Chapter[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 }
 
 model Chapter {
-  id        String  @id @default(uuid())
-  title     String
-  position  Int
-  isPublished Boolean @default(false)
-  isFree    Boolean @default(false)
+  id         String  @id @default(uuid())
+  title      String
+  position   Int
 
-  courseId  String
-  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons   Lesson[]
-  quizzes   Quiz[]
+  moduleId   String?
+  courseId String
+  courses   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  module     Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  lessons    Lesson[]
+  quizzes    Quiz[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 }
 
 model Lesson {

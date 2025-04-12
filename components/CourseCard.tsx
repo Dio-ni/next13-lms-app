@@ -10,7 +10,7 @@ interface CourseCardProps {
   id: string;
   title: string;
   imageUrl: string;
-  chaptersLength: number;
+  modulesLength: number;
   progress: number | null;
   category: string;
 }
@@ -19,7 +19,7 @@ const CourseCard = ({
   id,
   title,
   imageUrl,
-  chaptersLength,
+  modulesLength,
   progress,
   category,
 }: CourseCardProps) => {
@@ -59,7 +59,7 @@ const CourseCard = ({
           <div className="flex items-center my-3 text-sm gap-x-2">
             <IconBadge size="sm" icon={BookOpen} />
             <span>
-              {chaptersLength} {chaptersLength === 1 ? 'chapter' : 'chapters'}
+              {modulesLength} {modulesLength === 1 ? 'module' : 'modules'}
             </span>
           </div>
           <div className="space-y-4 mt-auto">

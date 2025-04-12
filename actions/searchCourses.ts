@@ -16,12 +16,17 @@ export const searchCourses = async (searchTerm: string) => {
       title: true,
       description: true,
       imageUrl:true,
-      chapters:true,
+      modules:{
+        include: {
+        chapters:true,
+        },
+      },
       category: {
         select: {
           name: true,
         },
       },
+      
     },
   });
 

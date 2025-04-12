@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';  // Prisma database instance
+import { db } from '@/lib/db';
 import { Category, Course, Lesson } from '@prisma/client';
 
 type CourseWithDetails = {
@@ -7,10 +7,14 @@ type CourseWithDetails = {
   description: string | null;
   imageUrl: string | null;
   category: Category | null;
-  chapters: {
+  modules: {
     id: string;
-    title:string;
-    lessons: Lesson[]; // Full Lesson data structure
+    title: string;
+    chapters: {
+      id: string;
+      title: string;
+      lessons: Lesson[];
+    }[];
   }[];
 };
 
@@ -21,24 +25,23 @@ export const getCourseById = async (courseId: string): Promise<CourseWithDetails
         id: courseId,
       },
       include: {
-        category: true,  // Include the associated category
-        chapters: {
-          where: {
-            isPublished: true,  // Only include published chapters
-          },
-          select: {
-            id: true,
-            title:true,  // Select only the chapter id
-            lessons: { // Include lessons with full details
-               // Only include published lessons
-              select: {
-                id: true, // Select the lesson id
-                title: true, // Select the lesson title
-                content: true, // Select the lesson content
-                videoUrl: true, // Select the lesson videoUrl
-                chapterId: true, // Select the lesson's chapterId
-                createdAt: true, // Select the lesson's createdAt
-                updatedAt: true, // Select the lesson's updatedAt
+        category: true,
+        modules: {
+          include: {
+            chapters: {
+              include: {
+                lessons: {
+                  select: {
+                    id: true,
+                    title: true,
+                    content: true,
+                    videoUrl: true,
+                    imageUrl: true, 
+                    chapterId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                  },
+                },
               },
             },
           },
@@ -47,7 +50,7 @@ export const getCourseById = async (courseId: string): Promise<CourseWithDetails
     });
 
     if (!course) {
-      return null;  // Return null if the course is not found
+      return null;
     }
 
     const courseDetails: CourseWithDetails = {
@@ -55,11 +58,15 @@ export const getCourseById = async (courseId: string): Promise<CourseWithDetails
       title: course.title,
       description: course.description,
       imageUrl: course.imageUrl,
-      category: course.category,  // Attach the category details
-      chapters: course.chapters.map((chapter) => ({
-        id: chapter.id,
-        title: chapter.title,
-        lessons: chapter.lessons,  // Attach the lessons details for each chapter
+      category: course.category,
+      modules: course.modules.map((module) => ({
+        id: module.id,
+        title: module.title,
+        chapters: module.chapters.map((chapter) => ({
+          id: chapter.id,
+          title: chapter.title,
+          lessons: chapter.lessons,
+        })),
       })),
     };
 

@@ -32,7 +32,7 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
       userId,
     },
     include: {
-      chapters: {
+      modules: {
         orderBy: {
           position: 'asc',
         },
@@ -60,7 +60,7 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
     course.description,
     course.imageUrl,
     course.categoryId,
-    course.chapters.some((chapter) => chapter.isPublished),
+    course.modules,
   ];
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter((field) => !!field).length;
