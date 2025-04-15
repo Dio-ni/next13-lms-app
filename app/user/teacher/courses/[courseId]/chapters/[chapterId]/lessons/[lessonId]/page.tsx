@@ -1,5 +1,4 @@
-
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 import { ArrowLeft, Eye, LayoutDashboard, Video } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -12,13 +11,16 @@ import { LessonContentForm } from './components/lesson-content-form';
 import { LessonVideoForm } from './components/lesson-video-form';
 // // import { LessonVideoForm } from './components/lesson-video-form';
 import { LessonImageForm } from './components/lesson-image-form';
+import { Actions } from './components/actions';
 
 const LessonIdPage = async ({
   params,
 }: {
   params: { courseId: string; lessonId: string; chapterId: string};
 }) => {
-  const { userId } = auth();
+  const authResponse = await auth();  // Await the response from auth()
+  const userId = authResponse.userId;
+  
   if (!userId) {
     return redirect('/');
   }
@@ -42,11 +44,11 @@ const LessonIdPage = async ({
 
   return (
     <>
-      <div className="p-6">
-        <div className="flex items-center justify-between">
+      <div className=" h-full pt-20 container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between ">
           <div className="w-full">
             <Link
-              href={`/teacher/courses/${params.courseId}`}
+              href={`/user/teacher/courses/${params.courseId}`}
               className="flex items-center mb-6 text-sm transition hover:opacity-75"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to course setup
@@ -58,7 +60,11 @@ const LessonIdPage = async ({
                   Complete all fields {completionText}
                 </span>
               </div>
-              <div>
+              <Actions
+                lessonId={params.lessonId}
+                courseId={params.courseId}
+              />
+              {/* <div>
                 <Button
                   // disabled={!isComplete}
                   // courseId={params.courseId}
@@ -66,7 +72,7 @@ const LessonIdPage = async ({
                 >
                   Save Lesson
                 </Button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

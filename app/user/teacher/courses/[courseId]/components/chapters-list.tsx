@@ -9,7 +9,7 @@ import {
   DropResult,
 } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
-import { Grip, Pencil, Check, X } from 'lucide-react';
+import { Grip, Pencil, Trash } from 'lucide-react'; // Import Trash icon
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import toast from 'react-hot-toast';
@@ -20,7 +20,7 @@ interface ChaptersListProps {
   courseId: string;
   items: Chapter[];
   onReorder: (updateData: { id: string; position: number }[]) => void;
-  onEdit: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
 const ChaptersList: FC<ChaptersListProps> = ({
@@ -94,6 +94,19 @@ const ChaptersList: FC<ChaptersListProps> = ({
     }
   };
 
+  // Handle delete chapter
+  const handleDelete = async (chapterId: string) => {
+    try {
+      await axios.delete(`/api/courses/${courseId}/chapters/${chapterId}`);
+      toast.success('Chapter deleted');
+      
+      // Remove the deleted chapter from state
+      setChapters((prev) => prev.filter((chapter) => chapter.id !== chapterId));
+    } catch {
+      toast.error('Failed to delete chapter');
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
@@ -114,64 +127,67 @@ const ChaptersList: FC<ChaptersListProps> = ({
             {chapters.map((chapter, index) => (
               <Draggable key={chapter.id} draggableId={chapter.id} index={index}>
                 {(provided) => (
-                  <div>
-                    <div className="gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm px-2">
+                  <div ref={provided.innerRef} {...provided.draggableProps} className='flex flex-col bg-slate-100 rounded-md mb-4'>
+                    
+                    <div
+                      className={cn(
+                        'flex items-center gap-x-2  border-slate-200 border text-slate-700  text-sm px-2',
+                        'bg-sky-100 border-sky-200 text-sky-700'
+                      )}
+                    >
                       <div
-                        {...provided.draggableProps}
-                        ref={provided.innerRef}
                         className={cn(
-                          'flex items-center gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm px-2',
-                           'bg-sky-100 border-sky-200 text-sky-700'
+                          'py-3 pr-2 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
+                          'border-r-sky-200 hover:bg-sky-200'
                         )}
+                        {...provided.dragHandleProps}
                       >
-                        <div
-                          className={cn(
-                            'py-3 pr-2 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
-                           'border-r-sky-200 hover:bg-sky-200'
-                          )}
-                          {...provided.dragHandleProps}
-                        >
-                          <Grip className="w-5 h-5" />
-                        </div>
-
-                        <div className="flex-1 py-2">
-                          {editingChapterId === chapter.id ? (
-                            <Input
-                              value={editedTitle}
-                              onChange={(e) => setEditedTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleSave(chapter.id);
-                                if (e.key === 'Escape') handleCancelEdit();
-                              }}
-                              onBlur={() => handleSave(chapter.id)}
-                              autoFocus
-                              className="text-sm"
-                            />
-                          ) : (
-                            chapter.title
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-x-2 pr-2">
-                          {editingChapterId === chapter.id ? (
-                            <Badge
-                              className={cn(
-                                'bg-slate-500 hover:bg-sky-700 text-white cursor-pointer transition-colors'
-                              )}
-                              onClick={() => handleSave(chapter.id)}
-                            >
-                              Save
-                            </Badge>
-                          ) : (
-                            <Pencil
-                              onClick={() => handleEdit(chapter)}
-                              className="w-4 h-4 cursor-pointer hover:opacity-75"
-                            />
-                          )}
-                        </div>
+                        <Grip className="w-5 h-5" />
                       </div>
 
-                      {/* Lesson Form */}
+                      <div className="flex-1 py-2">
+                        {editingChapterId === chapter.id ? (
+                          <Input
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSave(chapter.id);
+                              if (e.key === 'Escape') handleCancelEdit();
+                            }}
+                            onBlur={() => handleSave(chapter.id)}
+                            autoFocus
+                            className="text-sm"
+                          />
+                        ) : (
+                          <span>{chapter.title}</span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-x-2 pr-2">
+                        {editingChapterId === chapter.id ? (
+                          <Badge
+                            className={cn(
+                              'bg-slate-500 hover:bg-sky-700 text-white cursor-pointer transition-colors'
+                            )}
+                            onClick={() => handleSave(chapter.id)}
+                          >
+                            Save
+                          </Badge>
+                        ) : (
+                          <Pencil
+                            onClick={() => handleEdit(chapter)}
+                            className="w-4 h-4 cursor-pointer hover:opacity-75 "
+                          />
+                        )}
+
+                        {/* Delete button */}
+                        <Trash
+                          onClick={() => handleDelete(chapter.id)}
+                          className="w-4 h-4 cursor-pointer hover:opacity-75 text-red-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="ml-4 mb-6">
                       <LessonForm
                         courseId={courseId}
                         chapterId={chapter.id}
@@ -179,6 +195,8 @@ const ChaptersList: FC<ChaptersListProps> = ({
                         existingLessons={chapterLessons[chapter.id] || []}
                       />
                     </div>
+                    
+                    
                   </div>
                 )}
               </Draggable>

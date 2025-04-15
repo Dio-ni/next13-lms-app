@@ -5,7 +5,7 @@ import { PortableText } from "@portabletext/react";
 import { LoomEmbed } from "@/components/LoomEmbed";
 import VideoPlayer from "@/components/VideoPlayer";
 import { LessonCompleteButton } from "@/components/LessonCompleteButton";
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 
 interface LessonPageProps {
   params: Promise<{
@@ -16,7 +16,9 @@ interface LessonPageProps {
 
 export default async function LessonPage({ params }: LessonPageProps) {
   // const user = await currentUser();
-  const { userId } = auth(); // Fetch current user asynchronously
+  const authResponse = await auth();  // Await the response from auth()
+    const userId = authResponse.userId;
+  
   const { courseId, lessonId } = await params;
 
   const lesson = await getLessonById(lessonId);

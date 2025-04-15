@@ -1,11 +1,9 @@
-import { authMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
-export default authMiddleware({
-  afterAuth: (req, res) => {
-    // Custom behavior after auth check
-    // Example: allow access or return a custom response
-  },
+export default clerkMiddleware({
+  // Любые настройки
 });
+
 
 export const config = {
   matcher: [

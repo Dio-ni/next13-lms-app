@@ -112,7 +112,16 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
               </div>
               <ChaptersForm initialData={course} courseId={params.courseId} />
             </div>
-            
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox
+                id="certificateEnabled"
+                checked={certificateEnabled}
+                onCheckedChange={(val) => setCertificateEnabled(!!val)}
+              />
+              <label htmlFor="certificateEnabled" className="text-sm">
+                Выдавать сертификат по завершении
+              </label>
+            </div>
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={File} />

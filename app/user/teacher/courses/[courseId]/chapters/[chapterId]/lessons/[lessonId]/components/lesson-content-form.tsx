@@ -110,7 +110,7 @@ const LessonContentForm: FC<LessonContentFormProps> = ({
           </form>
         </Form>
       ) : (
-        <p
+        <div
           className={cn(
             'text-sm mt-2',
             !initialData.content && 'text-slate-500 italic'
@@ -121,7 +121,7 @@ const LessonContentForm: FC<LessonContentFormProps> = ({
           ) : (
             'No content'
           )}
-        </p>
+        </div>
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 
 export async function PATCH(
@@ -7,44 +7,43 @@ export async function PATCH(
   { params }: { params: { courseId: string } }
 ) {
   try {
-    const { userId } = auth();
+    const authResponse = await auth();  // Await the response from auth()
+    const userId = authResponse.userId;
+  
+
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const course = await db.course.findUnique({
+    // Get the course by ID and userId
+    const course = await db.course.findFirst({
       where: {
         id: params.courseId,
         userId,
       },
       include: {
-        chapters: {
-          include: {
-            muxData: true,
-          },
-        },
+        chapter: true, // direct relation in your schema
       },
     });
 
     if (!course) {
-      return new NextResponse('Not Found', { status: 404 });
+      return new NextResponse('Course not found', { status: 404 });
     }
 
-    const hasPublishedChapter = course.chapters.some(
-      (chapter) => chapter.isPublished
-    );
+    // Validate required fields
+    const hasTitle = !!course.title?.trim();
+    const hasDescription = !!course.description?.trim();
+    const hasImageUrl = !!course.imageUrl?.trim();
+    const hasCategory = !!course.categoryId;
 
-    if (
-      !course.title ||
-      !course.description ||
-      !course.imageUrl ||
-      !course.categoryId ||
-      !hasPublishedChapter
-    ) {
-      return new NextResponse('Missing required fields', { status: 401 });
+    if (!hasTitle || !hasDescription || !hasImageUrl || !hasCategory) {
+      return new NextResponse('Missing required fields to publish the course.', {
+        status: 400,
+      });
     }
 
-    const publishedCourse = await db.course.update({
+    // Publish course
+    const updatedCourse = await db.course.update({
       where: {
         id: params.courseId,
       },
@@ -52,9 +51,10 @@ export async function PATCH(
         isPublished: true,
       },
     });
-    return NextResponse.json(publishedCourse);
+
+    return NextResponse.json(updatedCourse);
   } catch (error) {
-    console.log('[COURSE_ID_PUBLISH]', error);
-    return new NextResponse('Internal Error', { status: 500 });
+    console.error('[COURSE_PUBLISH_ERROR]', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
