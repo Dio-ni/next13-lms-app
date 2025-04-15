@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from 'next/server';
 import Mux from '@mux/mux-node';
 import { db } from '@/lib/db';
@@ -20,7 +20,9 @@ export async function PATCH(
   }
 ) {
   try {
-    const { userId } = auth();
+    const authResponse = await auth();  // Await the response from auth()
+    const userId = authResponse.userId;
+  
     if (!userId) {
       return new Response('Unauthorized', { status: 401 });
     }
@@ -90,5 +92,53 @@ export async function PATCH(
   } catch (error) {
     console.log('[COURSES_LESSON_ID]', error);
     return new NextResponse('Internal Error', { status: 500 });
+  }
+}
+
+
+export async function DELETE(
+  req: Request,
+  {
+    params,
+  }: {
+    params: {
+      courseId: string;
+      lessonId: string;
+    };
+  }
+) {
+  try {
+    const authResponse = await auth();  // Await the response from auth()
+    const userId = authResponse.userId;
+  
+    if (!userId) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const { courseId, lessonId } = params;
+
+    // Ensure the lesson exists and belongs to a course the user owns
+    const course = await db.course.findUnique({
+      where: {
+        id: courseId,
+        userId,
+      },
+    });
+
+    if (!course) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // Delete the lesson
+    const deletedLesson = await db.lesson.delete({
+      where: {
+        id: lessonId,
+      },
+    });
+
+    return NextResponse.json(deletedLesson);
+  } catch (error) {
+    console.error('[LESSON_DELETE]', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

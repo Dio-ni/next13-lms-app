@@ -1,26 +1,20 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Chapter, Course, Module } from '@prisma/client';
+import { Module, Course } from '@prisma/client';
 import axios from 'axios';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { FC, useState, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { Loading } from '@/components/loading';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ModulesList } from './modules-list';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Loading } from '@/components/loading';
+import { ChapterForm } from './chapters-form'; // you'll build this next
 
 interface ModulesFormProps {
   initialData: Course & {
@@ -33,126 +27,166 @@ const moduleSchema = z.object({
   title: z.string().min(1),
 });
 
-const chapterSchema = z.object({
-  title: z.string().min(1),
-});
-
-const ModulesForm: FC<ModulesFormProps> = ({ courseId, initialData }) => {
+const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
   const router = useRouter();
-  const [isUpdating, setIsUpdating] = useState(false);
   const [modules, setModules] = useState<Module[]>(initialData.modules);
-  const [chaptersByModule, setChaptersByModule] = useState<{ [key: string]: Chapter[] }>({});
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+  const [titleInputs, setTitleInputs] = useState<{ [key: string]: string }>({});
+  const [isSavingTitle, setIsSavingTitle] = useState<boolean>(false);
   const [creatingModule, setCreatingModule] = useState(false);
-  const [creatingChapterForModule, setCreatingChapterForModule] = useState<string | null>(null);
 
-  const moduleForm = useForm<z.infer<typeof moduleSchema>>({
+  const form = useForm<z.infer<typeof moduleSchema>>({
     resolver: zodResolver(moduleSchema),
     defaultValues: { title: '' },
   });
 
-  const chapterForm = useForm<z.infer<typeof chapterSchema>>({
-    resolver: zodResolver(chapterSchema),
-    defaultValues: { title: '' },
-  });
+  const handleTitleChange = (moduleId: string, value: string) => {
+    setTitleInputs((prev) => ({ ...prev, [moduleId]: value }));
+  };
 
-  const onModuleSubmit = async (values: z.infer<typeof moduleSchema>) => {
+  const saveModuleTitle = async (moduleId: string) => {
+    setIsSavingTitle(true);
+    try {
+      await axios.put(`/api/courses/${courseId}/modules/${moduleId}`, {
+        title: titleInputs[moduleId],
+      });
+      toast.success('Module title updated');
+      setModules((prev) =>
+        prev.map((mod) =>
+          mod.id === moduleId ? { ...mod, title: titleInputs[moduleId] } : mod
+        )
+      );
+      setEditingTitleId(null);
+    } catch {
+      toast.error('Error updating module title');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+
+  const createModule = async (values: z.infer<typeof moduleSchema>) => {
     try {
       const res = await axios.post(`/api/courses/${courseId}/modules`, values);
       toast.success('Module created');
       setModules((prev) => [...prev, res.data]);
+      form.reset();
       setCreatingModule(false);
-      moduleForm.reset();
     } catch {
-      toast.error('Failed to create module');
+      toast.error('Error creating module');
     }
   };
 
-  const onChapterSubmit = async (values: z.infer<typeof chapterSchema>) => {
-    if (!creatingChapterForModule) return;
+  const deleteModule = async (moduleId: string) => {
     try {
-      await axios.post(`/api/courses/${courseId}/modules/${creatingChapterForModule}/chapters`, values);
-      toast.success('Chapter created');
-      chapterForm.reset();
-      loadChapters(creatingChapterForModule);
-      setCreatingChapterForModule(null);
+      await axios.delete(`/api/courses/${courseId}/modules/${moduleId}`);
+      toast.success('Module deleted');
+      setModules((prev) => prev.filter((module) => module.id !== moduleId));
     } catch {
-      toast.error('Failed to create chapter');
+      toast.error('Error deleting module');
     }
-  };
-
-  const loadChapters = async (moduleId: string) => {
-    try {
-      const res = await axios.get(`/api/courses/${courseId}/modules/${moduleId}/chapters`);
-      setChaptersByModule((prev) => ({ ...prev, [moduleId]: res.data }));
-    } catch {
-      toast.error('Failed to load chapters');
-    }
-  };
-
-  const onReorderChapters = async (updateData: { id: string; position: number }[]) => {
-    try {
-      setIsUpdating(true);
-      await axios.put(`/api/courses/${courseId}/modules/${creatingChapterForModule}/chapters/reorder`, { list: updateData });
-      toast.success('Chapters reordered');
-      router.refresh();
-    } catch {
-      toast.error('Reorder failed');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const onEdit = (id: string) => {
-    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
   };
 
   useEffect(() => {
-    modules.forEach((module) => loadChapters(module.id));
-  }, [modules]);
+    const initTitles: { [key: string]: string } = {};
+    initialData.modules.forEach((mod) => {
+      initTitles[mod.id] = mod.title;
+    });
+    setTitleInputs(initTitles);
+  }, [initialData.modules]);
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
-      {isUpdating && (
-        <div className="absolute top-0 right-0 flex items-center justify-center w-full h-full bg-slate-500/20 rounded-m">
-          <Loader2 className="w-6 h-6 animate-spin text-sky-700" />
-        </div>
-      )}
-      <div className="flex items-center justify-between font-medium">
-        Course modules
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Course Modules</h2>
         <Button variant="ghost" onClick={() => setCreatingModule(!creatingModule)}>
-          {creatingModule ? 'Cancel' : (<><PlusCircle className="w-4 h-4 mr-2" /> Add Module</>)}
+          {creatingModule ? 'Cancel' : (
+            <>
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Add Module
+            </>
+          )}
         </Button>
       </div>
 
       {creatingModule && (
-        <Form {...moduleForm}>
-          <form onSubmit={moduleForm.handleSubmit(onModuleSubmit)} className="mt-4 space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(createModule)} className="mb-6 space-y-4">
             <FormField
-              control={moduleForm.control}
+              control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Module title" {...field} />
+                    <Input
+                      placeholder="e.g. 'Introduction Module'"
+                      disabled={form.formState.isSubmitting}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button disabled={!moduleForm.formState.isValid || moduleForm.formState.isSubmitting} type="submit">
-              {moduleForm.formState.isSubmitting && <Loading />} Create Module
+            <Button
+              type="submit"
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && <Loading />} Create Module
             </Button>
           </form>
         </Form>
       )}
 
-      <ModulesList
-        courseId={courseId}
-        modules={modules}
-        chaptersByModule={chaptersByModule}
-        onReorder={onReorderChapters}
-        onTitleUpdate={onEdit} // Assuming `onEdit` handles updating the title
-      />
+      {modules.map((mod) => (
+        <div key={mod.id} className="mb-6 border p-4 rounded-md bg-white shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            {editingTitleId === mod.id ? (
+              <>
+                <Input
+                  value={titleInputs[mod.id]}
+                  onChange={(e) => handleTitleChange(mod.id, e.target.value)}
+                  disabled={isSavingTitle}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => saveModuleTitle(mod.id)}
+                  disabled={isSavingTitle}
+                >
+                  {isSavingTitle ? <Loading /> : 'Save'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditingTitleId(null)}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-md font-medium">{mod.title}</h3>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setEditingTitleId(mod.id)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => deleteModule(mod.id)}
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Insert ChapterForm here for each module */}
+          <ChapterForm courseId={courseId} moduleId={mod.id} />
+        </div>
+      ))}
     </div>
   );
 };

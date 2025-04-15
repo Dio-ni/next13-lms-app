@@ -42,7 +42,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
                     id={course.id}
                     title={course.title}
                     imageUrl={course.imageUrl || ""}
-                    chaptersLength={course.chapters.length}
+                    modulesLength={course.modules.length}
                     progress={null} // Assume you will add progress logic later
                     category={course.category?.name || "Uncategorized"}
               />

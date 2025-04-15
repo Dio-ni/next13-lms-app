@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 // import { isTeacher } from '@/lib/teacher';
 import { auth } from '@clerk/nextjs';
+import { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request, res: Response) {

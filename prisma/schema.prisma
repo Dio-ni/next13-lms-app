@@ -24,7 +24,8 @@ model Course {
   imageUrl    String?  @db.Text
   isPublished Boolean  @default(false)
   categoryId  String? 
-
+  certificateEnabled  Boolean  @default(false) 
+  
   category   Category? @relation(fields: [categoryId], references: [id])
   modules   Module[]
   attachments Attachment[]
@@ -35,7 +36,9 @@ model Course {
 
 
 
-  Chapter Chapter[]
+  chapter Chapter[]
+
+  quiz Quiz[]
 }
 
 model Module {
@@ -63,7 +66,6 @@ model Chapter {
   module     Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   lessons    Lesson[]
-  quizzes    Quiz[]
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt()
@@ -85,40 +87,29 @@ model Lesson {
 }
 
 model Quiz {
-  id       String  @id @default(uuid())
-  title    String
-  chapterId String
-
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  title     String
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id])
   questions Question[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
 }
 
 model Question {
-  id       String  @id @default(uuid())
+  id       Int       @id @default(autoincrement())
   text     String
-  quizId   String
-
-  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options QuizOption []
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  quizId   Int
+  quiz     Quiz      @relation(fields: [quizId], references: [id])
+  options  Option[]
 }
 
-model QuizOption  {
-  id         String  @id @default(uuid())
-  text       String
-  isCorrect  Boolean
-  questionId String
-
-  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+model Option {
+  id        Int      @id @default(autoincrement())
+  text      String
+  isCorrect Boolean
+  questionId Int
+  question  Question @relation(fields: [questionId], references: [id])
 }
+
 
 model UserProgress {
   id          String  @id @default(uuid())

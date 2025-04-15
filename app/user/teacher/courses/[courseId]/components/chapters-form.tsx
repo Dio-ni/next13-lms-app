@@ -1,16 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Chapter, Course, Module } from '@prisma/client';
+import { Chapter } from '@prisma/client';
 import axios from 'axios';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { FC, useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
-import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -20,112 +18,91 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { ChaptersList } from './chapters-list';
 
-interface ChaptersFormProps {
-  initialData: Course & {
-    modules: Module[]; // List of modules attached to the course
-  };
-  courseId: string;
-}
-
-const formSchema = z.object({
-  title: z.string().min(1),
+const schema = z.object({
+  title: z.string().min(1, 'Title is required'),
 });
 
-const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
-  const router = useRouter();
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const [chaptersByModule, setChaptersByModule] = useState<{ [key: string]: Chapter[] }>({});
+interface ChapterFormProps {
+  courseId: string;
+  moduleId: string;
+}
 
-  const toggleCreating = () => {
-    setIsCreating((prev) => !prev);
-  };
+export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [creating, setCreating] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-    },
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { title: '' },
   });
 
-  const { isSubmitting, isValid } = form.formState;
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const fetchChapters = async () => {
     try {
-      await axios.post(`/api/courses/${courseId}/chapters`, values);
-      toast.success('Chapter created');
-      toggleCreating();
-      router.refresh();
+      const res = await axios.get(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters`
+      );
+      setChapters(res.data);
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Failed to load chapters');
     }
-  };
-
-  const onReorder = async (updateData: { id: string; position: number }[]) => {
-    try {
-      setIsUpdating(true);
-      await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
-        list: updateData,
-      });
-      toast.success('Chapters reordered');
-      router.refresh();
-    } catch (error) {
-      toast.error('Something went wrong');
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const onEdit = (id: string) => {
-    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
   };
 
   useEffect(() => {
-    // Fetch chapters for each module on initial render
-    const fetchChapters = async () => {
-      const chaptersData = await Promise.all(
-        initialData.modules.map(async (module) => {
-          const response = await axios.get(`/api/courses/${courseId}/modules/${module.id}/chapters`);
-          return { moduleId: module.id, chapters: response.data };
-        })
-      );
-      const chaptersMap: { [key: string]: Chapter[] } = {};
-      chaptersData.forEach((data) => {
-        chaptersMap[data.moduleId] = data.chapters;
-      });
-      setChaptersByModule(chaptersMap);
-    };
-
     fetchChapters();
-  }, [courseId, initialData.modules]);
+  }, [moduleId]);
+
+  const onCreate = async (values: z.infer<typeof schema>) => {
+    try {
+      const res = await axios.post(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters`,
+        values
+      );
+      toast.success('Chapter created');
+      form.reset();
+      setCreating(false);
+      setChapters((prev) => [...prev, res.data]);
+    } catch {
+      toast.error('Failed to create chapter');
+    }
+  };
+
+  const onReorder = async (data: { id: string; position: number }[]) => {
+    try {
+      setIsReordering(true);
+      await axios.put(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters/reorder`,
+        { list: data }
+      );
+      toast.success('Chapters reordered');
+      await fetchChapters();
+    } catch {
+      toast.error('Failed to reorder chapters');
+    } finally {
+      setIsReordering(false);
+    }
+  };
 
   return (
-    <div className="p-4 mt-6 border rounded-md bg-slate-100">
-      {isUpdating && (
-        <div className="absolute top-0 right-0 flex items-center justify-center w-full h-full bg-slate-500/20 rounded-m">
-          <Loader2 className="w-6 h-6 animate-spin text-sky-700" />
-        </div>
-      )}
-      <div className="flex items-center justify-between font-medium">
-        Course chapters
-        <Button variant="ghost" type="button" onClick={toggleCreating}>
-          {isCreating ? (
-            'Cancel'
-          ) : (
+    <div className="border rounded-md p-4 bg-white mt-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">Chapters</h3>
+        <Button variant="ghost" onClick={() => setCreating(!creating)}>
+          {creating ? 'Cancel' : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add a chapter
+              Add Chapter
             </>
           )}
         </Button>
       </div>
-      {isCreating ? (
+
+      {creating && (
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onCreate)}
             className="mt-4 space-y-4"
           >
             <FormField
@@ -134,59 +111,40 @@ const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      disabled={isSubmitting}
-                      placeholder="e.g. 'Introduction to the course'"
-                      {...field}
-                    />
+                    <Input placeholder="Chapter title" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button disabled={!isValid || isSubmitting} type="submit">
-              {isSubmitting && <Loading />}
-              Create
+
+            <Button
+              type="submit"
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2 className="animate-spin w-4 h-4 mr-2" />
+              )}
+              Create Chapter
             </Button>
           </form>
         </Form>
-      ) : (
-        <>
-          <div
-            className={cn(
-              'text-sm mt-2',
-              initialData.modules.length === 0 && 'text-slate-500 italic'
-            )}
-          >
-            {initialData.modules.length === 0 ? (
-              'No modules'
-            ) : (
-              initialData.modules.map((module) => (
-                <div key={module.id}>
-                  <div className="font-semibold">{module.title}</div>
-                  {/* Render chapters for each module */}
-                  {chaptersByModule[module.id] && chaptersByModule[module.id].length > 0 ? (
-                    <ChaptersList
-                      courseId={courseId}
-                      onEdit={onEdit}
-                      onReorder={onReorder}
-                      items={chaptersByModule[module.id]}
-                    />
-                  ) : (
-                    <p>No chapters</p>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-
-          <p className="mt-4 text-xs text-muted-foreground">
-            Drag and drop to reorder the chapters
-          </p>
-        </>
       )}
+
+      {isReordering && (
+        <div className="mt-4 text-sm text-sky-600 flex items-center">
+          <Loader2 className="animate-spin w-4 h-4 mr-2" />
+          Reordering...
+        </div>
+      )}
+
+      <div className="mt-4">
+        <ChaptersList
+          courseId={courseId} // ✅ fixed
+          items={chapters}
+          onReorder={onReorder}
+        />
+      </div>
     </div>
   );
 };
-
-export { ChaptersForm };
