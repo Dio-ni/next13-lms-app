@@ -160,6 +160,14 @@ export default async function CoursePage({ params }: CoursePageProps) {
           <div>
             <div className="bg-card rounded-lg p-6 sticky top-4 border border-border">
               <h2 className="text-xl font-bold mb-4">Instructor</h2>
+              <form action={`/api/courses/${course.id}/certificate/generateCertificate`} method="POST">
+                <button
+                  type="submit"
+                  className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+                >
+                  Скачать сертификат
+                </button>
+              </form>
               {/* You can add instructor details if you wish */}
             </div>
           </div>

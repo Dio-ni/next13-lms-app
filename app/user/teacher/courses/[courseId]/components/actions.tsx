@@ -26,17 +26,22 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
     try {
       setIsLoading(true);
 
-      if (isPublished) {
-        await axios.patch(`/api/courses/${courseId}/unpublish`);
-        toast.success('Course unpublished');
-      } else {
-        await axios.patch(`/api/courses/${courseId}/publish`);
-        toast.success('Course published');
+      const endpoint = isPublished
+        ? `/api/courses/${courseId}/unpublish`
+        : `/api/courses/${courseId}/publish`;
+
+      await axios.patch(endpoint);
+
+      toast.success(isPublished ? 'Course unpublished' : 'Course published');
+      
+      // Trigger confetti if the course was published
+      if (!isPublished) {
         confetti.onOpen();
       }
 
       router.refresh();
-    } catch {
+    } catch (error) {
+      console.error(error);  // Log the error for debugging
       toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
@@ -50,9 +55,9 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
       await axios.delete(`/api/courses/${courseId}`);
 
       toast.success('Course deleted');
-      router.refresh();
-      router.push(`/teacher/courses`);
-    } catch {
+      router.push('/teacher/courses');  // Redirect to courses list after deletion
+    } catch (error) {
+      console.error(error);  // Log the error for debugging
       toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
@@ -69,6 +74,7 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
       >
         {isPublished ? 'Unpublish' : 'Publish'}
       </Button>
+
       <ConfirmModal onConfirm={onDelete}>
         <Button size="sm" disabled={isLoading}>
           <Trash className="w-4 h-4" />

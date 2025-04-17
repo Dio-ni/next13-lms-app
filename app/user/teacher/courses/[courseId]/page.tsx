@@ -1,5 +1,6 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from "@clerk/nextjs/server";
 import {
+  ArrowLeft,
   CircleDollarSign,
   File,
   LayoutDashboard,
@@ -9,19 +10,30 @@ import { redirect } from 'next/navigation';
 
 import { IconBadge } from '@/components/icon-badge';
 import { db } from '@/lib/db';
-
+import Link from 'next/link';
 import { CategoryForm } from './components/category-form';
 import { DescriptionForm } from './components/description-form';
 import { ImageForm } from './components/image-form';
 import { TitleForm } from './components/title-form';
+import { CertificateToggleForm } from './components/certificate-form';
 import { AttachmentForm } from './components/attachment-form';
-import { ChaptersForm } from './components/chapters-form';
+// import { ChaptersForm } from './components/chapters-form';
 import { Banner } from '@/components/banner';
 import { Actions } from './components/actions';
+import { ModulesForm } from './components/modules-form';
+// import { QuizForm } from './components/quiz-form';
 
-const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
-  const { userId } = auth();
+interface CourseIdPageProps {
+  params: {
+    courseId: string;
+  };
+}
 
+const CourseIdPage = async ({ params }: CourseIdPageProps) => {
+  const authResponse = await auth(); 
+
+  const userId = authResponse.userId;
+  
   if (!userId) {
     return redirect('/');
   }
@@ -42,8 +54,18 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
           createdAt: 'desc',
         },
       },
+      // quiz: {
+      //   include: {
+      //     questions: {
+      //       include: {
+      //         options: true,
+      //       },
+      //     },
+      //   },
+      // },
     },
   });
+  
   
   const categories = await db.category.findMany({
     orderBy: {
@@ -73,9 +95,15 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
       {!course.isPublished && (
         <Banner label="This course is unpublished. It will not be visible to the students." />
       )}
-      <div className="p-6h-full pt-16 container">
+      <div className=" h-full pt-16 container">
         <div className="mx-auto px-4 py-8">
           <div className="flex flex-col gap-y-2">
+          <Link
+              href={`/user/teacher/courses`}
+              className="flex items-center mb-6 text-sm transition hover:opacity-75"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back to courses
+            </Link>
             <h1 className="text-2xl font-medium">Course setup</h1>
             <span className="text-sm text-slate-700">
               Complete all fields {completionText}
@@ -104,6 +132,30 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
                 value: category.id,
               }))}
             />
+            <div>
+              <div className="flex items-center gap-x-2 mt-6">
+                <IconBadge icon={ListChecks} />
+                <h2 className="text-xl">Course Quiz</h2>
+              </div>
+              <div className="m-6">
+                <CertificateToggleForm 
+                  courseId={params.courseId}
+                  initialValue={course.certificateEnabled}
+                />
+              </div>
+              {/* <QuizForm 
+                courseId={params.courseId} 
+                initialData={{
+                  quiz: course.quiz, // Assuming course.quiz is a single quiz object
+                  questions: course.quiz.questions, // Questions related to the quiz
+                }} 
+              /> */}
+
+            </div>
+
+
+
+
           </div>
 
           {/* Chapter and Lesson form */}
@@ -113,7 +165,7 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
                 <IconBadge icon={ListChecks} />
                 <h2 className="text-xl">Course Chapters</h2>
               </div>
-              <ChaptersForm initialData={course} courseId={params.courseId} />
+              <ModulesForm initialData={course} courseId={params.courseId} />
             </div>
 
             {/* Resources & Attachments form */}

@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, Pencil, PlusCircle } from 'lucide-react';
 import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -73,7 +73,7 @@ const LessonForm: FC<LessonFormProps> = ({
 
   return (
     <div className="mt-4">
-      <div className="flex items-center justify-between mb-2 font-medium">
+      <div className="flex items-center justify-between mb-1 font-medium text-slate-600">
         Lessons
         <Button
           variant="ghost"
@@ -116,12 +116,12 @@ const LessonForm: FC<LessonFormProps> = ({
         </Form>
       )}
 
-      <ul className="pl-4 mt-4 space-y-1">
+      <ul className="pl-4 mt-1 space-y-1 pr-3">
         {existingLessons.length ? (
           existingLessons.map((lesson) => (
             <li
               key={lesson.id}
-              className="text-sm text-slate-600 flex justify-between items-center"
+              className="text-sm  flex justify-between items-center"
             >
               <span>{lesson.title}</span>
               {/* {onEditLesson && ( */}
@@ -129,7 +129,7 @@ const LessonForm: FC<LessonFormProps> = ({
                   onClick={() => onEditLesson(lesson.id)}
                   className="hover:opacity-70"
                 >
-                  <PlusCircle className="w-4 h-4 text-muted-foreground" />
+                  <Pencil className="w-4 h-4 text-muted-foreground" />
                 </button>
               {/* )} */}
             </li>

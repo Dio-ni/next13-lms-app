@@ -12,6 +12,8 @@ import { LessonContentForm } from './components/lesson-content-form';
 import { LessonVideoForm } from './components/lesson-video-form';
 // // import { LessonVideoForm } from './components/lesson-video-form';
 import { LessonImageForm } from './components/lesson-image-form';
+import { Actions } from './components/actions';
+// import { ImageForm } from './components/image-form';
 
 const LessonIdPage = async ({
   params,
@@ -46,7 +48,7 @@ const LessonIdPage = async ({
         <div className="flex items-center justify-between">
           <div className="w-full">
             <Link
-              href={`/teacher/courses/${params.courseId}`}
+              href={`/user/teacher/courses/${params.courseId}`}
               className="flex items-center mb-6 text-sm transition hover:opacity-75"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to course setup
@@ -59,6 +61,10 @@ const LessonIdPage = async ({
                 </span>
               </div>
               <div>
+              <Actions
+                lessonId={params.lessonId}
+                courseId={params.courseId}
+              />
                 <Button
                   // disabled={!isComplete}
                   // courseId={params.courseId}
@@ -112,12 +118,17 @@ const LessonIdPage = async ({
               courseId={params.courseId}
             />
             {/* Lesson Image URL Form */}
-            <LessonImageForm
+            {/* <LessonImageForm
               initialData={lesson}
               lessonId={params.lessonId}
               courseId={params.courseId}
               chapterId={params.chapterId}
-            />
+            /> */}
+             {/* <ImageForm 
+              initialData={lesson}
+              lessonId={params.lessonId}
+              courseId={params.courseId}
+              chapterId={params.chapterId} /> */}
           </div>
         </div>
       </div>

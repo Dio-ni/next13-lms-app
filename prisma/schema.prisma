@@ -24,6 +24,7 @@ model Course {
   imageUrl    String?  @db.Text
   isPublished Boolean  @default(false)
   categoryId  String? 
+  certificateEnabled Boolean @default(false)
 
   category   Category? @relation(fields: [categoryId], references: [id])
   modules   Module[]
@@ -33,9 +34,8 @@ model Course {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
-
-
-  Chapter Chapter[]
+  chapter Chapter[]
+  // quiz Quiz[]
 }
 
 model Module {
