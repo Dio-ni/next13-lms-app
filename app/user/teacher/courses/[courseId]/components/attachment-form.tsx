@@ -20,6 +20,7 @@ interface AttachmentFormProps {
 
 const formSchema = z.object({
   url: z.string().min(1),
+  name: z.string().min(1),
 });
 
 const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
@@ -33,13 +34,14 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/attachments`, values);
-      toast.success('Course updated');
+      toast.success('Attachment uploaded');
       toggleEdit();
       router.refresh();
     } catch {
       toast.error('Something went wrong');
     }
   };
+  
 
   const onDelete = async (id: string) => {
     try {
@@ -73,12 +75,14 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
         <div>
           <FileUpload
             endpoint="courseAttachment"
-            onChange={(url) => {
-              if (url) {
-                onSubmit({ url });
+            withName
+            onChange={({ url, name }) => {
+              if (url && name) {
+                onSubmit({ url, name });
               }
             }}
           />
+
           <div className="mt-4 text-xs text-muted-foreground">
             Add a file to your course. The file will be available to download
           </div>

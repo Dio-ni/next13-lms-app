@@ -1,11 +1,14 @@
+
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from '@clerk/nextjs';
 import { getLessonById } from "@/actions/getLessonById";
-import { PortableText } from "@portabletext/react";
-import { LoomEmbed } from "@/components/LoomEmbed";
+import { Preview } from "@/components/preview";
 import VideoPlayer from "@/components/VideoPlayer";
 import { LessonCompleteButton } from "@/components/LessonCompleteButton";
-import { auth } from '@clerk/nextjs';
+import Image from 'next/image';
+// import { useState } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
+ // Assuming you have a spinner component
 
 interface LessonPageProps {
   params: Promise<{
@@ -15,7 +18,6 @@ interface LessonPageProps {
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
-  // const user = await currentUser();
   const { userId } = auth(); // Fetch current user asynchronously
   const { courseId, lessonId } = await params;
 
@@ -25,10 +27,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
     return redirect(`/dashboard/courses/${courseId}`);
   }
 
-  // If user is null, redirect to login or show an error message
-  // if (!userId) {
-  //   return redirect("/user"); // or show a custom message like "Please log in"
-  // }
+  // const [isImageLoading, setIsImageLoading] = useState(true); // State for image loading
+  // const [isVideoLoading, setIsVideoLoading] = useState(true); // State for video loading
+
+  // const handleImageLoad = () => {
+  //   setIsImageLoading(false); // Image has finished loading
+  // };
+
+  
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -36,24 +42,35 @@ export default async function LessonPage({ params }: LessonPageProps) {
         <div className="max-w-4xl mx-auto pt-12 pb-20 px-4">
           <h1 className="text-2xl font-bold mb-4">{lesson.title}</h1>
 
-          {lesson.content && (
-            <p className="text-muted-foreground mb-8">{lesson.content}</p>
-          )}
-
           <div className="space-y-8">
             {/* Video Section */}
-            {lesson.videoUrl && <VideoPlayer url={lesson.videoUrl} />}
+            {lesson.videoUrl && (
+              <div className="relative">
+                {/* {isVideoLoading && <LoadingSpinner />} Show spinner while video is loading */}
+                <VideoPlayer url={lesson.videoUrl}  />
+              </div>
+            )}
 
-            {/* Loom Embed Video if loomUrl is provided */}
-            {/* {lesson.videoUrl && <LoomEmbed shareUrl={lesson.videoUrl} />} */}
+            {/* Image Section */}
+            {lesson.imageUrl && (
+              <div className="relative mt-2 aspect-video">
+                {/* {isImageLoading && <LoadingSpinner />} Show spinner while image is loading */}
+                <Image
+                  alt="Lesson image"
+                  fill
+                  className="object-cover rounded-md"
+                  src={lesson.imageUrl}
+                  // onLoadingComplete={handleImageLoad} // Trigger the load complete handler
+                />
+              </div>
+            )}
 
             {/* Lesson Content */}
             {lesson.content && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Lesson Notes</h2>
                 <div className="prose prose-blue dark:prose-invert max-w-none">
-                  {/* <PortableText value={lesson.content} /> */}
-                  {lesson.content}
+                  <Preview value={lesson.content} />
                 </div>
               </div>
             )}

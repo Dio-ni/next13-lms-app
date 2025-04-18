@@ -11,9 +11,9 @@ import { LessonTitleForm } from './components/lesson-title-form';
 import { LessonContentForm } from './components/lesson-content-form';
 import { LessonVideoForm } from './components/lesson-video-form';
 // // import { LessonVideoForm } from './components/lesson-video-form';
-import { LessonImageForm } from './components/lesson-image-form';
+// import { LessonImageForm } from './components/lesson-image-form';
 import { Actions } from './components/actions';
-// import { ImageForm } from './components/image-form';
+import { LessonImageForm } from './components/image-form';
 
 const LessonIdPage = async ({
   params,
@@ -44,14 +44,14 @@ const LessonIdPage = async ({
 
   return (
     <>
-      <div className="p-6">
-        <div className="flex items-center justify-between">
+      <div className="p-6 ">
+        <div className="flex items-center justify-between mt-14">
           <div className="w-full">
             <Link
               href={`/user/teacher/courses/${params.courseId}`}
-              className="flex items-center mb-6 text-sm transition hover:opacity-75"
+              className="flex items-center mb-6  text-sm transition hover:opacity-75"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to course setup
+              <ArrowLeft className="w-4 h-4 mr-2 " /> Back to course setup
             </Link>
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col gap-y-2">
@@ -65,13 +65,7 @@ const LessonIdPage = async ({
                 lessonId={params.lessonId}
                 courseId={params.courseId}
               />
-                <Button
-                  // disabled={!isComplete}
-                  // courseId={params.courseId}
-                  // lessonId={params.lessonId}
-                >
-                  Save Lesson
-                </Button>
+                
               </div>
             </div>
           </div>
@@ -124,11 +118,11 @@ const LessonIdPage = async ({
               courseId={params.courseId}
               chapterId={params.chapterId}
             /> */}
-             {/* <ImageForm 
+             <LessonImageForm 
               initialData={lesson}
               lessonId={params.lessonId}
               courseId={params.courseId}
-              chapterId={params.chapterId} /> */}
+              chapterId={params.chapterId} />
           </div>
         </div>
       </div>

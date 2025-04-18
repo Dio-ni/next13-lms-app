@@ -5,6 +5,8 @@ import { ArrowLeft, BookOpen } from "lucide-react";
 import EnrollButton from "@/components/EnrollButton";
 import { isEnrolledInCourse } from "@/actions/isEnrolledInCourse";
 import { currentUser } from "@clerk/nextjs/server";
+import { File } from "lucide-react"; // Make sure this is imported
+
 
 interface CoursePageProps {
   params: Promise<{
@@ -20,6 +22,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     where: { id },
     include: {
       category: true,
+      attachments:true,
       modules: { // First level is modules
         select: {
           id: true,
@@ -168,7 +171,26 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   Скачать сертификат
                 </button>
               </form>
-              {/* You can add instructor details if you wish */}
+             
+              <div className="space-y-3 mt-6">
+                <h3 className="font-semibold text-lg">Course Attachments</h3>
+                {course.attachments.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No attachments available.</p>
+                )}
+                {course.attachments.map((attachment) => (
+                  <a
+                    key={attachment.id}
+                    href={`/api/courses/${course.id}/attachments/${attachment.id}`}
+                    className="flex items-center w-full p-3 border rounded-sm border-sky-200 text-sky-700 hover:bg-sky-50 transition"
+                  >
+                    <File className="flex-shrink-0 w-4 h-4 mr-2" />
+                    <p className="text-sm line-clamp-1">{attachment.name}</p>
+                  </a>
+                
+                  
+                ))}
+              </div>
+
             </div>
           </div>
         </div>

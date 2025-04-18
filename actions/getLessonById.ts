@@ -7,6 +7,7 @@ type LessonWithCourseAndChapter = {
   title: string;
   content: string | null;
   videoUrl: string | null;
+  imageUrl: string | null;
   chapter: Chapter;
   course: Course | null;  // Make course nullable
   module: Module | null;  // Make module nullable
@@ -39,6 +40,7 @@ export const getLessonById = async (id: string): Promise<LessonWithCourseAndChap
       title: lesson.title,
       content: lesson.content,
       videoUrl: lesson.videoUrl,
+      imageUrl: lesson.imageUrl,
       chapter: lesson.chapter,  // Attach chapter details
       course: lesson.chapter.module?.course || null,  // Attach course details (null-safe)
       module: lesson.chapter.module,  // Attach module details (null-safe)

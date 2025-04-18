@@ -37,19 +37,19 @@ export async function PATCH(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Update lesson with imageUrl or any other field
+    // Update the lesson with the provided fields (allowing dynamic updates)
     const updatedLesson = await db.lesson.update({
       where: {
         id: lessonId,
       },
       data: {
-        imageUrl: values.imageUrl, // Only handling imageUrl here, or spread `...values` if needed
+        ...values, // Dynamically spread the values to update all fields (e.g., videoUrl, title, content, etc.)
       },
     });
 
     return NextResponse.json(updatedLesson);
   } catch (error) {
-    console.error('[LESSON_IMAGE_UPDATE]', error);
+    console.error('[LESSON_UPDATE]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

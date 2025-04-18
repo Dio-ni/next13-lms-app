@@ -55,6 +55,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
       await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, values);
       toast.success('Video URL updated');
       toggleEdit();
+      window.location.reload();
     } catch {
       toast.error('Something went wrong');
     }
