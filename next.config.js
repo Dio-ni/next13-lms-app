@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['utfs.io'], // ← Add correct CDN if used
+    domains: ['y68c6h8plr.ufs.sh'], // ← Add correct CDN if used
   },
     
 };
