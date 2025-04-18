@@ -1,10 +1,21 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import Link from "next/link";
-import { BookOpen, BookMarkedIcon, UserCog, SwitchCamera } from "lucide-react";
+import {
+  BookOpen,
+  BookMarkedIcon,
+  UserCog,
+  SwitchCamera,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { SearchInput } from "./SearchInput";
 
@@ -14,6 +25,7 @@ export default function Header() {
   const { isSignedIn } = useUser();
   const [role, setRole] = useState<Role | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isSignedIn) {
@@ -27,9 +39,8 @@ export default function Header() {
     setRole(newRole);
     localStorage.setItem("role", newRole);
 
-    // Redirect after role change
     if (newRole === "student") {
-      router.push("/courses");
+      router.push("/");
     } else if (newRole === "teacher") {
       router.push("/teacher/courses");
     }
@@ -48,50 +59,73 @@ export default function Header() {
     </Link>
   );
 
-  const GuestNav = () => (
-    <nav>
+  const NavLink = ({
+    href,
+    label,
+  }: {
+    href: string;
+    label: string;
+  }) => {
+    const isActive = pathname === href;
+
+    return (
       <Link
-        href="/courses"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        href={href}
+        className={`text-sm font-medium transition-colors ${
+          isActive
+            ? "text-foreground border-b-2 border-primary pb-1"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
       >
-        Courses
+        {label}
       </Link>
+    );
+  };
+
+  const GuestNav = () => (
+    <nav className="flex gap-4 items-center">
+      <NavLink href="/" label="Courses" />
     </nav>
   );
 
   const StudentNav = () => (
     <nav className="flex gap-4 items-center">
-      <Link href="/courses" className="nav-link">All Courses</Link>
-      <Link href="/mycourses" className="nav-link">My Courses</Link>
+      <NavLink href="/" label="All Courses" />
+      <NavLink href="/my-courses" label="My Courses" />
     </nav>
   );
 
   const TeacherNav = () => (
     <nav className="flex gap-4 items-center">
-      <Link href="/teacher/mycourses" className="nav-link">Teaching</Link>
+      <NavLink href="/teacher/courses" label="Teaching" />
     </nav>
   );
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Logo />
-            {isSignedIn && role === "student" && <SearchInput />}
+        <div className="flex h-16 items-center justify-between">
+          <Logo />
+
+          <div className="flex-1 flex justify-center">
+            <SignedOut>
+              <GuestNav />
+            </SignedOut>
+            <SignedIn>
+              {role === "student" && <StudentNav />}
+              {role === "teacher" && <TeacherNav />}
+            </SignedIn>
           </div>
 
           <div className="flex items-center gap-4">
             <SignedOut>
-              <GuestNav />
               <SignInButton mode="modal">
                 <Button variant="outline">Sign In</Button>
               </SignInButton>
             </SignedOut>
 
             <SignedIn>
-              {role === "student" && <StudentNav />}
-              {role === "teacher" && <TeacherNav />}
+              {isSignedIn && role === "student" && <SearchInput />}
 
               {role && (
                 <div className="flex items-center gap-2">
@@ -104,7 +138,6 @@ export default function Header() {
                   </Button>
                 </div>
               )}
-
               <UserButton />
             </SignedIn>
           </div>
