@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Course } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, MoreHorizontal, Pencil } from 'lucide-react';
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export const columns: ColumnDef<Course>[] = [
   {
@@ -24,7 +25,7 @@ export const columns: ColumnDef<Course>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Title
+          Атауы
           <ArrowUpDown className="w-4 h-4 ml-2" />
         </Button>
       );
@@ -39,7 +40,7 @@ export const columns: ColumnDef<Course>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Published
+          Жарияланды
           <ArrowUpDown className="w-4 h-4 ml-2" />
         </Button>
       );
@@ -48,7 +49,7 @@ export const columns: ColumnDef<Course>[] = [
       const isPublished = row.getValue('isPublished') || false;
       return (
         <Badge className={cn('bg-slate-500', isPublished && 'bg-sky-700')}>
-          {isPublished ? 'Published' : 'Draft'}
+          {isPublished ? 'Жарияланды' : 'Жоба'}
         </Badge>
       );
     },
@@ -58,23 +59,16 @@ export const columns: ColumnDef<Course>[] = [
     header: () => null,
     cell: ({ row }) => {
       const { id } = row.original;
+      
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-8 h-4 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <Link href={`/teacher/courses/${id}`}>
-              <DropdownMenuItem>
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex gap-4">
+          <Link href={`/teacher/courses/${id}`} className='flex gap-2'>
+            <Pencil className="w-4 h-4 cursor-pointer hover:opacity-75" />
+            Өңдеу
+          </Link>
+
+          
+      </div>
       );
     },
   },

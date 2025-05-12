@@ -1,6 +1,6 @@
 'use client';
 
-import { Chapter } from '@prisma/client';
+import { Chapter, Lesson } from '@prisma/client';
 import { FC, useEffect, useState } from 'react';
 import {
   DragDropContext,
@@ -9,27 +9,43 @@ import {
   DropResult,
 } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
-import { Grip, Pencil } from 'lucide-react';
+import { Grip, Pencil, Trash } from 'lucide-react'; // Import Trash icon
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { LessonForm } from './lessons-form';
 
 interface ChaptersListProps {
+  courseId: string;
   items: Chapter[];
   onReorder: (updateData: { id: string; position: number }[]) => void;
-  onEdit: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
-const ChaptersList: FC<ChaptersListProps> = ({ items, onEdit, onReorder }) => {
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+const ChaptersList: FC<ChaptersListProps> = ({
+  courseId,
+  items,
+  onEdit,
+  onReorder,
+}) => {
+  const [chapterLessons, setChapterLessons] = useState<Record<string, Lesson[]>>({});
+  const [isMounted, setIsMounted] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>(items);
+  const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
+  const [editedTitle, setEditedTitle] = useState<string>('');
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+
     const items = Array.from(chapters);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    const startIndex = Math.min(result.source.index, result.destination.index);
-    const endIndex = Math.max(result.source.index, result.destination.index);
-    const updatedChapters = items.slice(startIndex, endIndex + 1);
+
+    const updatedChapters = items.map((chapter, index) => ({
+      ...chapter,
+      position: index,
+    }));
     setChapters(items);
 
     const bulkUpdateData = updatedChapters.map((chapter) => ({
@@ -40,6 +56,57 @@ const ChaptersList: FC<ChaptersListProps> = ({ items, onEdit, onReorder }) => {
     onReorder(bulkUpdateData);
   };
 
+  const handleEdit = (chapter: Chapter) => {
+    setEditingChapterId(chapter.id);
+    setEditedTitle(chapter.title);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingChapterId(null);
+    setEditedTitle('');
+  };
+
+  const loadLessons = async (chapterId: string) => {
+    try {
+      const res = await axios.get(`/api/courses/${courseId}/chapters/${chapterId}/lessons`);
+      setChapterLessons((prev) => ({ ...prev, [chapterId]: res.data }));
+    } catch {
+      toast.error('Сабақтар жүктелмеді');
+    }
+  };
+
+  const handleSave = async (chapterId: string) => {
+    try {
+      if (!editedTitle.trim()) return toast.error('Атауы бос болмауы керек');
+
+      await axios.put(`/api/courses/${courseId}/chapters/${chapterId}`, {
+        title: editedTitle,
+      });
+      toast.success('Атауы жаңартылды');
+
+      const updated = chapters.map((ch) =>
+        ch.id === chapterId ? { ...ch, title: editedTitle } : ch
+      );
+      setChapters(updated);
+      setEditingChapterId(null);
+    } catch {
+      toast.error('Атауы жаңартылмады');
+    }
+  };
+
+  // Handle delete chapter
+  const handleDelete = async (chapterId: string) => {
+    try {
+      await axios.delete(`/api/courses/${courseId}/chapters/${chapterId}`);
+      toast.success('Бөлім жойылды');
+      
+      // Remove the deleted chapter from state
+      setChapters((prev) => prev.filter((chapter) => chapter.id !== chapterId));
+    } catch {
+      toast.error('Бөлім жойылмады');
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
@@ -47,9 +114,10 @@ const ChaptersList: FC<ChaptersListProps> = ({ items, onEdit, onReorder }) => {
 
   useEffect(() => {
     setChapters(items);
+    items.forEach((chapter) => loadLessons(chapter.id));
   }, [items]);
 
-  if (!isMounted) null;
+  if (!isMounted) return null;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -57,47 +125,78 @@ const ChaptersList: FC<ChaptersListProps> = ({ items, onEdit, onReorder }) => {
         {(provider) => (
           <div {...provider.droppableProps} ref={provider.innerRef}>
             {chapters.map((chapter, index) => (
-              <Draggable
-                key={chapter.id}
-                draggableId={chapter.id}
-                index={index}
-              >
+              <Draggable key={chapter.id} draggableId={chapter.id} index={index}>
                 {(provided) => (
-                  <div
-                    {...provided.draggableProps}
-                    ref={provided.innerRef}
-                    className={cn(
-                      'flex items-center gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm',
-                      chapter.isPublished &&
-                        'bg-sky-100 border-sky-200 text-sky-700'
-                    )}
-                  >
+                  <div ref={provided.innerRef} {...provided.draggableProps} className='flex flex-col bg-slate-100 rounded-md mb-4'>
+                    
                     <div
                       className={cn(
-                        'px-2 py-3 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
-                        chapter.isPublished &&
-                          'border-r-sky-200 hover:bg-sky-200'
+                        'flex items-center gap-x-2  border-slate-200 border text-slate-700  text-sm px-2',
+                        'bg-sky-100 border-sky-200 text-sky-700'
                       )}
-                      {...provided.dragHandleProps}
                     >
-                      <Grip className="w-5 h-5" />
-                    </div>
-                    {chapter.title}
-                    <div className="flex items-center pr-2 ml-auto gap-x-2">
-                      {chapter.isFree && <Badge>Free</Badge>}
-                      <Badge
+                      <div
                         className={cn(
-                          'bg-slate-500',
-                          chapter.isPublished && 'bg-sky-700'
+                          'py-3 pr-2 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
+                          'border-r-sky-200 hover:bg-sky-200'
                         )}
+                        {...provided.dragHandleProps}
                       >
-                        {chapter.isPublished ? 'Published' : 'Draft'}
-                      </Badge>
-                      <Pencil
-                        onClick={() => onEdit(chapter.id)}
-                        className="w-4 h-4 transition cursor-pointer hover:opacity-75"
+                        <Grip className="w-5 h-5" />
+                      </div>
+
+                      <div className="flex-1 py-2">
+                        {editingChapterId === chapter.id ? (
+                          <Input
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSave(chapter.id);
+                              if (e.key === 'Escape') handleCancelEdit();
+                            }}
+                            onBlur={() => handleSave(chapter.id)}
+                            autoFocus
+                            className="text-sm"
+                          />
+                        ) : (
+                          <span>{chapter.title}</span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-x-2 pr-2">
+                        {editingChapterId === chapter.id ? (
+                          <Badge
+                            className={cn(
+                              'bg-slate-500 hover:bg-sky-700 text-white cursor-pointer transition-colors'
+                            )}
+                            onClick={() => handleSave(chapter.id)}
+                          >
+                            Сақтау
+                          </Badge>
+                        ) : (
+                          <Pencil
+                            onClick={() => handleEdit(chapter)}
+                            className="w-4 h-4 cursor-pointer hover:opacity-75 "
+                          />
+                        )}
+
+                        {/* Delete button */}
+                        <Trash
+                          onClick={() => handleDelete(chapter.id)}
+                          className="w-4 h-4 cursor-pointer hover:opacity-75 text-red-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="ml-4 mb-6">
+                      <LessonForm
+                        courseId={courseId}
+                        chapterId={chapter.id}
+                        onLessonCreated={() => loadLessons(chapter.id)}
+                        existingLessons={chapterLessons[chapter.id] || []}
                       />
                     </div>
+                    
+                    
                   </div>
                 )}
               </Draggable>

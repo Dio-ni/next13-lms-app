@@ -26,18 +26,23 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
     try {
       setIsLoading(true);
 
-      if (isPublished) {
-        await axios.patch(`/api/courses/${courseId}/unpublish`);
-        toast.success('Course unpublished');
-      } else {
-        await axios.patch(`/api/courses/${courseId}/publish`);
-        toast.success('Course published');
+      const endpoint = isPublished
+        ? `/api/courses/${courseId}/unpublish`
+        : `/api/courses/${courseId}/publish`;
+
+      await axios.patch(endpoint);
+
+      toast.success(isPublished ? 'Курс жобасына ауысты' : 'Курс жарияланды');
+      
+      // Курс жарияланған кезде конфетти көрсетеміз
+      if (!isPublished) {
         confetti.onOpen();
       }
 
       router.refresh();
-    } catch {
-      toast.error('Something went wrong');
+    } catch (error) {
+      console.error(error);  // Қателерді тексеру үшін
+      toast.error('Қате орын алды');
     } finally {
       setIsLoading(false);
     }
@@ -49,26 +54,27 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 
       await axios.delete(`/api/courses/${courseId}`);
 
-      toast.success('Course deleted');
-      router.refresh();
-      router.push(`/teacher/courses`);
-    } catch {
-      toast.error('Something went wrong');
+      toast.success('Курс жойылды');
+      router.push('/teacher/courses');  // Курс тізіміне қайта бағыттау
+    } catch (error) {
+      console.error(error);  // Қателерді тексеру үшін
+      toast.error('Қате орын алды');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-x-2">
+    <div className="flex items-center gap-x-2 mt-4">
       <Button
         onClick={onClick}
         disabled={disabled || isLoading}
         variant="outline"
         size="sm"
       >
-        {isPublished ? 'Unpublish' : 'Publish'}
+        {isPublished ? 'Жобалау' : 'Жариялау'}
       </Button>
+
       <ConfirmModal onConfirm={onDelete}>
         <Button size="sm" disabled={isLoading}>
           <Trash className="w-4 h-4" />

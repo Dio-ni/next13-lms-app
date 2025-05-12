@@ -9,23 +9,11 @@ datasource db {
   relationMode = "prisma"
 }
 
-model Attachment {
-  id        String   @id @default(uuid())
-  name      String
-  url       String   @db.Text
-  courseId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
-
-  @@index([courseId], map: "Attachment_courseId_idx")
-  Course Course[]
-}
-
 model Category {
   id   String @id @default(uuid())
   name String @unique(map: "Category_name_key")
 
-  Course Course[]
+  courses Course[]
 }
 
 model Course {
@@ -35,95 +23,138 @@ model Course {
   description String?  @db.Text
   imageUrl    String?  @db.Text
   isPublished Boolean  @default(false)
-  categoryId  String?
+  categoryId  String? 
+  certificateEnabled Boolean @default(false)
 
-  category Category? @relation(fields: [categoryId], references: [id])
-  chapters Chapter[]
+  category   Category? @relation(fields: [categoryId], references: [id])
+  modules   Module[]
   attachments Attachment[]
   enrollments Enrollment[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-  @@index([categoryId], map: "Course_categoryId_idx")
+  chapter Chapter[]
+  // quiz Quiz[]
 }
 
+model Module {
+  id        String   @id @default(uuid())
+  title     String
+  position  Int      @default(0)
+  courseId  String
 
-model Chapter {
-  id          String   @id @default(uuid())
-  title       String
-  description String?  @db.Text
-  videoUrl    String?  @db.Text
-  imageUrl    String?  @db.Text    
-  position    Int
-  isPublished Boolean  @default(false)
-  isFree      Boolean  @default(false)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapters  Chapter[]
 
-  muxData     MuxData? 
-
-  courseId    String
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  userProgress UserProgress[]    
-  createdAt DateTime @default(now())  
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 }
-model MuxData {  
-  id String @id @default(uuid())  
-  assetId String  
-  playbackId String?  
 
-  chapterId String @unique  
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)  
+model Chapter {
+  id         String  @id @default(uuid())
+  title      String
+  position   Int
+
+  moduleId   String?
+  courseId String
+  courses   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  module     Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  lessons    Lesson[]
+  quizzes    Quiz[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+}
+
+model Lesson {
+  id         String  @id @default(uuid())
+  title      String
+  content    String?  @db.Text
+  videoUrl   String?  @db.Text
+  imageUrl   String?  @db.Text
+  chapterId  String
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  userProgress UserProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Quiz {
+  id       String  @id @default(uuid())
+  title    String
+  chapterId String
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Question {
+  id       String  @id @default(uuid())
+  text     String
+  quizId   String
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options QuizOption []
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model QuizOption  {
+  id         String  @id @default(uuid())
+  text       String
+  isCorrect  Boolean
+  questionId String
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
 
 model UserProgress {
-    id          String   @id @default(uuid())
-    userId      String
+  id          String  @id @default(uuid())
+  userId      String
+  lessonId    String?
+  isCompleted Boolean @default(false)
 
-    chapterId   String
-    chapter     Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
-    isCompleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt()
-
-    @@index([chapterId]) // Corrected syntax
-    @@unique([userId, chapterId]) // Ensure unique combination of userId and chapterId
+  @@unique([userId, lessonId]) // Ensures tracking per user per lesson
 }
-
-// model Purchase {
-//     id String @id @default(uuid())
-//     userId String
-
-//     courseId String
-    
-//     course Course @relation(fields: [courseId], references: [id], onDelete: Cascade) // Error validating field `course` in model `Purchase`. The rela
-
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt()
-
-    
-
-//     @@index([courseId])
-//     @@unique([userId, courseId])
-// }
 
 model Enrollment {
-    id String @id @default(uuid())
-    userId String
+  id       String @id @default(uuid())
+  userId   String
+  courseId String
 
-    courseId String
-    
-    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade) // Error validating field `course` in model `Purchase`. The rela
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
-    @@index([courseId])
-    @@unique([userId, courseId])
+  @@unique([userId, courseId])
 }
 
 
+model Attachment {
+  id        String   @id @default(uuid()) // Ensure primary key
+  name      String
+  url       String   @db.Text
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}

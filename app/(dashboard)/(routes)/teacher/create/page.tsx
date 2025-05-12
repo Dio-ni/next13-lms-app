@@ -49,8 +49,8 @@ const CreatePage = () => {
   };
 
   return (
-    <div className="flex h-full max-w-5xl p-6 mx-auto md:items-center md:justify-center">
-      <div>
+    <div className="h-full pt-16 flex h-full max-w-5xl p-6 mx-auto md:items-center md:justify-center">
+      <div className='container mx-auto px-4 py-8'>
         <h1 className="text-2xl">Name your course</h1>
         <p className="text-sm text-slate-600">
           Give your course a name. You can always change it later.
@@ -94,6 +94,7 @@ const CreatePage = () => {
         </Form>
       </div>
     </div>
+    
   );
 };
 

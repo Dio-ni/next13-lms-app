@@ -1,16 +1,14 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Chapter, Course } from '@prisma/client';
+import { Chapter } from '@prisma/client';
 import axios from 'axios';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { FC, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
-import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -20,92 +18,91 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { ChaptersList } from './chapters-list';
 
-interface ChaptersFormProps {
-  initialData: Course & {
-    chapters: Chapter[];
-  };
-  courseId: string;
-}
-
-const formSchema = z.object({
-  title: z.string().min(1),
+const schema = z.object({
+  title: z.string().min(1, 'Атауы қажет'),
 });
 
-const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
-  const router = useRouter();
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+interface ChapterFormProps {
+  courseId: string;
+  moduleId: string;
+}
 
-  const toggleCreating = () => {
-    setIsCreating((prev) => !prev);
-  };
+export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [creating, setCreating] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-    },
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: { title: '' },
   });
 
-  const { isSubmitting, isValid } = form.formState;
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const fetchChapters = async () => {
     try {
-      await axios.post(`/api/courses/${courseId}/chapters`, values);
-      toast.success('Chapter created');
-      toggleCreating();
-      router.refresh();
+      const res = await axios.get(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters`
+      );
+      setChapters(res.data);
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Тараулар жүктелмеді');
     }
   };
 
-  const onReorder = async (updateData: { id: string; position: number }[]) => {
+  useEffect(() => {
+    fetchChapters();
+  }, [moduleId]);
+
+  const onCreate = async (values: z.infer<typeof schema>) => {
     try {
-      setIsUpdating(true);
-      await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
-        list: updateData,
-      });
-      toast.success('Chapters reordered');
-      router.refresh();
-    } catch (error) {
-      toast.error('Something went wrong');
-    } finally {
-      setIsUpdating(false);
+      const res = await axios.post(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters`,
+        values
+      );
+      toast.success('Бөлім құрылды');
+      form.reset();
+      setCreating(false);
+      setChapters((prev) => [...prev, res.data]);
+    } catch {
+      toast.error('Бөлім жасалмады.');
     }
   };
 
-  const onEdit = (id: string) => {
-    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
+  const onReorder = async (data: { id: string; position: number }[]) => {
+    try {
+      setIsReordering(true);
+      await axios.put(
+        `/api/courses/${courseId}/modules/${moduleId}/chapters/reorder`,
+        { list: data }
+      );
+      toast.success('Бөлімдер қайта реттелді');
+      await fetchChapters();
+    } catch {
+      toast.error('Бөлімдердің ретін өзгерту мүмкін болмады');
+    } finally {
+      setIsReordering(false);
+    }
   };
 
   return (
-    <div className="p-4 mt-6 border rounded-md bg-slate-100">
-      {isUpdating && (
-        <div className="absolute top-0 right-0 flex items-center justify-center w-full h-full bg-slate-500/20 rounded-m">
-          <Loader2 className="w-6 h-6 animate-spin text-sky-700" />
-        </div>
-      )}
-      <div className="flex items-center justify-between font-medium">
-        Course chapters
-        <Button variant="ghost" type="button" onClick={toggleCreating}>
-          {isCreating ? (
-            'Cancel'
-          ) : (
+    <div className="border rounded-md p-4 bg-white mt-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">Бөлімдер</h3>
+        <Button variant="ghost" onClick={() => setCreating(!creating)}>
+          {creating ? 'Бас тарту' : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add a chapter
+              Бөлім қосу
             </>
           )}
         </Button>
       </div>
-      {isCreating ? (
+
+      {creating && (
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onCreate)}
             className="mt-4 space-y-4"
           >
             <FormField
@@ -114,48 +111,40 @@ const ChaptersForm: FC<ChaptersFormProps> = ({ courseId, initialData }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input
-                      disabled={isSubmitting}
-                      placeholder="e.g. 'Introduction to the course'"
-                      {...field}
-                    />
+                    <Input placeholder="Бөлім атауы" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button disabled={!isValid || isSubmitting} type="submit">
-              {isSubmitting && <Loading />}
-              Create
+
+            <Button
+              type="submit"
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && (
+                <Loader2 className="animate-spin w-4 h-4 mr-2" />
+              )}
+              Бөлум қосу
             </Button>
           </form>
         </Form>
-      ) : (
-        <>
-          <div
-            className={cn(
-              'text-sm mt-2',
-              !initialData.chapters.length && 'text-slate-500 italic'
-            )}
-          >
-            {!initialData.chapters.length ? (
-              'No chapters'
-            ) : (
-              <ChaptersList
-                onEdit={onEdit}
-                onReorder={onReorder}
-                items={initialData.chapters || []}
-              />
-            )}
-          </div>
-
-          <p className="mt-4 text-xs text-muted-foreground">
-            Drag and drop to reorder the chapters
-          </p>
-        </>
       )}
+
+      {isReordering && (
+        <div className="mt-4 text-sm text-sky-600 flex items-center">
+          <Loader2 className="animate-spin w-4 h-4 mr-2" />
+          Ретін өзгерту...
+        </div>
+      )}
+
+      <div className="mt-4">
+        <ChaptersList
+          courseId={courseId} // ✅ fixed
+          items={chapters}
+          onReorder={onReorder}
+        />
+      </div>
     </div>
   );
 };
-
-export { ChaptersForm };

@@ -25,15 +25,14 @@ const ConfirmModal: FC<ConfirmModalProps> = ({ children, onConfirm }) => {
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>Шынымен сенімдісіз бе?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            data.
+            Бұл әрекет қайтарылмайды. Бұл сіздің деректеріңізді тұрақты түрде жояды.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogCancel>Бас тарту</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Жалғастыру</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

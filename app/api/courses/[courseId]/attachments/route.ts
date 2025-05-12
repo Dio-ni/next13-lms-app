@@ -14,7 +14,11 @@ export async function POST(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const { url } = await req.json();
+    const { url, name } = await req.json(); // <- Accept both url and name
+
+    if (!url || !name) {
+      return new NextResponse('Missing data', { status: 400 });
+    }
 
     const courseOwner = await db.course.findUnique({
       where: {
@@ -30,7 +34,7 @@ export async function POST(
     const attachment = await db.attachment.create({
       data: {
         url,
-        name: url.split('/').pop(),
+        name, // <- Use provided name
         courseId: params.courseId,
       },
     });
@@ -41,3 +45,4 @@ export async function POST(
     return new NextResponse('Internal Error', { status: 500 });
   }
 }
+

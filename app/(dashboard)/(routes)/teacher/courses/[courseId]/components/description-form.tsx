@@ -29,7 +29,7 @@ interface DescriptionFormProps {
 
 const formSchema = z.object({
   description: z.string().min(1, {
-    message: 'Description is required',
+    message: 'Сипаттама міндетті',
   }),
 });
 
@@ -54,25 +54,25 @@ const DescriptionForm: FC<DescriptionFormProps> = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success('Course updated');
+      toast.success('Курс сәтті жаңартылды');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     }
   };
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Course description
+        Курстың сипаттамасы
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
-            'Cancel'
+            'Бас тарту'
           ) : (
             <>
               <Pencil className="w-4 h-4 mr-2" />
-              Edit description
+              Сипаттаманы өңдеу
             </>
           )}
         </Button>
@@ -91,7 +91,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({
                   <FormControl>
                     <Textarea
                       disabled={isSubmitting}
-                      placeholder="e.g. 'This course is about...'"
+                      placeholder="мысалы: 'Бұл курс ... туралы'"
                       {...field}
                     />
                   </FormControl>
@@ -102,7 +102,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 {isSubmitting && <Loading />}
-                Save
+                Сақтау
               </Button>
             </div>
           </form>
@@ -114,7 +114,7 @@ const DescriptionForm: FC<DescriptionFormProps> = ({
             !initialData.description && 'text-slate-500 italic'
           )}
         >
-          {initialData.description || 'No description'}
+          {initialData.description || 'Сипаттама жоқ'}
         </p>
       )}
     </div>
