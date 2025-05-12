@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Loading } from '@/components/loading';
-import { ChapterForm } from './chapters-form'; // you'll build this next
+import { ChapterForm } from './chapters-form'; // келесіде құрамыз
 
 interface ModulesFormProps {
   initialData: Course & {
@@ -50,7 +50,7 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
       await axios.put(`/api/courses/${courseId}/modules/${moduleId}`, {
         title: titleInputs[moduleId],
       });
-      toast.success('Module title updated');
+      toast.success('Модуль атауы жаңартылды');
       setModules((prev) =>
         prev.map((mod) =>
           mod.id === moduleId ? { ...mod, title: titleInputs[moduleId] } : mod
@@ -58,7 +58,7 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
       );
       setEditingTitleId(null);
     } catch {
-      toast.error('Error updating module title');
+      toast.error('Атауды жаңарту кезінде қате болды');
     } finally {
       setIsSavingTitle(false);
     }
@@ -67,22 +67,22 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
   const createModule = async (values: z.infer<typeof moduleSchema>) => {
     try {
       const res = await axios.post(`/api/courses/${courseId}/modules`, values);
-      toast.success('Module created');
+      toast.success('Модуль жасалды');
       setModules((prev) => [...prev, res.data]);
       form.reset();
       setCreatingModule(false);
     } catch {
-      toast.error('Error creating module');
+      toast.error('Модуль жасау кезінде қате болды');
     }
   };
 
   const deleteModule = async (moduleId: string) => {
     try {
       await axios.delete(`/api/courses/${courseId}/modules/${moduleId}`);
-      toast.success('Module deleted');
+      toast.success('Модуль жойылды');
       setModules((prev) => prev.filter((module) => module.id !== moduleId));
     } catch {
-      toast.error('Error deleting module');
+      toast.error('Модульді жою кезінде қате болды');
     }
   };
 
@@ -97,12 +97,12 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Course Modules</h2>
+        <h2 className="text-lg font-semibold">Курс модульдері</h2>
         <Button variant="ghost" onClick={() => setCreatingModule(!creatingModule)}>
-          {creatingModule ? 'Cancel' : (
+          {creatingModule ? 'Бас тарту' : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add Module
+              Модуль қосу
             </>
           )}
         </Button>
@@ -118,7 +118,7 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
                 <FormItem>
                   <FormControl>
                     <Input
-                      placeholder="e.g. 'Introduction Module'"
+                      placeholder="мысалы, 'Кіріспе модулі'"
                       disabled={form.formState.isSubmitting}
                       {...field}
                     />
@@ -131,7 +131,7 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
               type="submit"
               disabled={!form.formState.isValid || form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting && <Loading />} Create Module
+              {form.formState.isSubmitting && <Loading />} Модуль құру
             </Button>
           </form>
         </Form>
@@ -152,14 +152,14 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
                   onClick={() => saveModuleTitle(mod.id)}
                   disabled={isSavingTitle}
                 >
-                  {isSavingTitle ? <Loading /> : 'Save'}
+                  {isSavingTitle ? <Loading /> : 'Сақтау'}
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setEditingTitleId(null)}
                 >
-                  Cancel
+                  Бас тарту
                 </Button>
               </>
             ) : (
@@ -183,7 +183,7 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
             )}
           </div>
 
-          {/* Insert ChapterForm here for each module */}
+          {/* Әр модульге арналған ChapterForm осында орналастырылады */}
           <ChapterForm courseId={courseId} moduleId={mod.id} />
         </div>
       ))}

@@ -54,11 +54,11 @@ const CategoryForm: FC<CategoryFormProps> = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success('Course updated');
+      toast.success('Курс жаңартылды');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Жаңарту кезінде қате орын алды');
     }
   };
 
@@ -69,14 +69,14 @@ const CategoryForm: FC<CategoryFormProps> = ({
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Course category
+      Курс категориясы
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
             'Cancel'
           ) : (
             <>
               <Pencil className="w-4 h-4 mr-2" />
-              Edit category
+              Категорияны өзгерту
             </>
           )}
         </Button>
@@ -102,7 +102,7 @@ const CategoryForm: FC<CategoryFormProps> = ({
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 {isSubmitting && <Loading />}
-                Save
+                Сақтау
               </Button>
             </div>
           </form>
@@ -114,7 +114,7 @@ const CategoryForm: FC<CategoryFormProps> = ({
             !initialData.categoryId && 'text-slate-500 italic'
           )}
         >
-          {selectedOption?.label || 'No category'}
+          {selectedOption?.label || 'Категория жоқ'}
         </p>
       )}
     </div>

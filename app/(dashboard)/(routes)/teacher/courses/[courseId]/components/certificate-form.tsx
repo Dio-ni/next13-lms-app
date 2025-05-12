@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 interface Props {
   courseId: string;
@@ -22,9 +22,9 @@ export const CertificateToggleForm = ({ courseId, initialValue }: Props) => {
       await axios.patch(`/api/courses/${courseId}/certificate`, {
         certificateEnabled: newValue,
       });
-      toast.success("Настройка обновлена");
+      toast.success('Курс жаңартылды');
     } catch {
-      toast.error("Ошибка при обновлении");
+      toast.error('Жаңарту кезінде қате орын алды');
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export const CertificateToggleForm = ({ courseId, initialValue }: Props) => {
         disabled={loading}
       />
       <label htmlFor="certificateEnabled" className="text-sm">
-        Выдавать сертификат по завершении
+        Курсты аяқтағаннан кейін сертификат беру
       </label>
     </div>
   );

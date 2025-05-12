@@ -21,7 +21,7 @@ export default async function CourseLayout({
 
   // Redirect if the user is not logged in
   if (!user?.id) {
-    return redirect("/user");  
+    return redirect("/");  
   }
 
   // Check if the user has access to the course
@@ -38,7 +38,7 @@ export default async function CourseLayout({
 
   // Redirect to "my courses" if the course is not found
   if (!course) {
-    return redirect("/user");
+    return redirect("/");
   }
   console.log(progress.completedLessons)
 

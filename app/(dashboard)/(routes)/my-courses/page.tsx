@@ -5,9 +5,12 @@ import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 import { getCourseProgress } from "@/actions/getCourseProgress";
 import { CourseCard } from "@/components/CourseCard";
+import { getCompletedLessons } from "@/actions/getCompletedLessons";
+import { calculateCourseProgress } from "@/actions/calculateCourseProgress";
 
 export default async function MyCoursesPage() {
   const user = await currentUser();
+  
 
   if (!user?.id) {
     return redirect("/");
@@ -19,10 +22,15 @@ export default async function MyCoursesPage() {
   const coursesWithProgress = await Promise.all(
     enrolledCourses.map(async ({ course }) => {
       if (!course) return null;
-      const progress = await getCourseProgress(user.id, course?.id);
+      
+      const completedLessons = await getCompletedLessons(course.id); // Await first
+      const progress = calculateCourseProgress(course.modules, completedLessons); // Then calculate
+      
+      
+      
       return {
         course,
-        progress: progress.courseProgress,
+        progress: progress,
       };
     })
   );
@@ -32,22 +40,21 @@ export default async function MyCoursesPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
           <GraduationCap className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">My Courses</h1>
+          <h1 className="text-3xl font-bold">Менің курстарым</h1>
         </div>
 
         {enrolledCourses.length === 0 ? (
           <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold mb-4">No courses yet</h2>
+            <h2 className="text-2xl font-semibold mb-4">Әзірге тіркелген курстар жоқ</h2>
             <p className="text-muted-foreground mb-8">
-              You haven&apos;t enrolled in any courses yet. Browse our courses
-              to get started!
+                Сіз ешқандай курсқа тіркелмегенсіз! Бастау үшін курстарымызды қарап шығыңыз!
             </p>
             <Link
               href="/"
               prefetch={false}
               className="inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Browse Courses
+              Курстарды қарау
             </Link>
           </div>
         ) : (
@@ -62,7 +69,7 @@ export default async function MyCoursesPage() {
                   title={item.course.title}
                   imageUrl={item.course.imageUrl || ""}
                   modulesLength={item.course.modules.length}
-                  progress={null} // Assume you will add progress logic later
+                  progress={item.progress} 
                   category={item.course.category || "Uncategorized"}
             />
               );

@@ -26,11 +26,11 @@ export const Actions = ({ lessonId , courseId}: ActionsProps) => {
 
       await axios.delete(`/api/courses/${courseId}/lessons/${lessonId}`);
 
-      toast.success('Course deleted');
+      toast.success('Сабақ жойылды');
       router.refresh();
-      router.push(`/user/teacher/courses/${courseId}`);
+      router.push(`/teacher/courses/${courseId}`);
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     } finally {
       setIsLoading(false);
     }

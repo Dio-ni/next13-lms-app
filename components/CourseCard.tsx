@@ -24,7 +24,7 @@ const CourseCard = ({
   category,
 }: CourseCardProps) => {
   return (
-    <Link href={`/user/courses/${id}`} prefetch={false} className="group hover:no-underline flex">
+    <Link href={`/courses/${id}`} prefetch={false} className="group hover:no-underline flex">
       <div className="bg-card rounded-xl overflow-hidden shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl hover:translate-y-[-4px] border border-border flex flex-col flex-1">
         <div className="relative h-52 w-full overflow-hidden">
           {imageUrl ? (
@@ -42,13 +42,13 @@ const CourseCard = ({
             />
           ) : (
             <div className="h-full w-full flex items-center justify-center bg-muted">
-              <span className="text-white font-bold">No Image</span>
+              <span className="text-white font-bold">Сурет жоқ</span>
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
             <span className="text-sm font-medium px-3 py-1 bg-black/50 text-white rounded-full backdrop-blur-sm">
-              {category || 'Uncategorized'}
+              {category || 'Санатталмаған'}
             </span>
           </div>
         </div>
@@ -59,18 +59,18 @@ const CourseCard = ({
           <div className="flex items-center my-3 text-sm gap-x-2">
             <IconBadge size="sm" icon={BookOpen} />
             <span>
-              {modulesLength} {modulesLength === 1 ? 'module' : 'modules'}
+              {modulesLength} {modulesLength === 1 ? 'модуль' : 'модульдер'}
             </span>
           </div>
           <div className="space-y-4 mt-auto">
-            {progress !== null ? (
+            {progress != null ? (
               <CourseProgress
                 variant={progress === 100 ? 'success' : 'default'}
                 size="sm"
                 value={progress}
               />
             ) : (
-              <p className="font-medium text-md md:text-sm text-slate-700">Not enrolled</p>
+              <p className="font-medium"></p>
             )}
           </div>
         </div>

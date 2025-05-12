@@ -34,11 +34,11 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/attachments`, values);
-      toast.success('Attachment uploaded');
+      toast.success('Қосымша жүктелді');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     }
   };
   
@@ -47,10 +47,10 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
     try {
       setDeletingId(id);
       await axios.delete(`/api/courses/${courseId}/attachments/${id}`);
-      toast.success('Attachment deleted');
+      toast.success('Қосымша жойылды');
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     } finally {
       setDeletingId(null);
     }
@@ -59,14 +59,14 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Course attachments
+        Курс қосымшалары
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
-            'Cancel'
+            'Бас тарту'
           ) : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add an file
+              Файл қосу
             </>
           )}
         </Button>
@@ -84,7 +84,7 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
           />
 
           <div className="mt-4 text-xs text-muted-foreground">
-            Add a file to your course. The file will be available to download
+            Курсқа файл қосыңыз. Файл жүктеу үшін қол жетімді болады
           </div>
         </div>
       ) : !initialData.imageUrl ? (
@@ -95,7 +95,7 @@ const AttachmentForm: FC<AttachmentFormProps> = ({ courseId, initialData }) => {
         <>
           {initialData.attachments.length === 0 ? (
             <p className="mt-2 text-sm italic text-slate-400">
-              No attachments yet.
+              Әлі қосымшалар жоқ.
             </p>
           ) : (
             <div className="space-y-3">

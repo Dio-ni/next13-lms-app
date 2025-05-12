@@ -40,7 +40,7 @@ export default function Header() {
     localStorage.setItem("role", newRole);
 
     if (newRole === "student") {
-      router.push("/");
+      router.push("/my-courses");
     } else if (newRole === "teacher") {
       router.push("/teacher/courses");
     }
@@ -84,20 +84,23 @@ export default function Header() {
 
   const GuestNav = () => (
     <nav className="flex gap-4 items-center">
-      <NavLink href="/" label="Courses" />
+      <NavLink href="/" label="Курстар" />
     </nav>
   );
 
   const StudentNav = () => (
     <nav className="flex gap-4 items-center">
-      <NavLink href="/" label="All Courses" />
-      <NavLink href="/my-courses" label="My Courses" />
+      <NavLink href="/" label="Басты бет" />
+      
+      <NavLink href="/courses-list" label="Барлық курстар" />
+      <NavLink href="/my-courses" label="Менің курстарым" />
     </nav>
   );
 
   const TeacherNav = () => (
     <nav className="flex gap-4 items-center">
-      <NavLink href="/teacher/courses" label="Teaching" />
+      <NavLink href="/" label="Басты бет" />
+      <NavLink href="/teacher/courses" label="Менің курстарым" />
     </nav>
   );
 
@@ -120,7 +123,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <SignedOut>
               <SignInButton mode="modal">
-                <Button variant="outline">Sign In</Button>
+                <Button variant="outline">Кіру</Button>
               </SignInButton>
             </SignedOut>
 
@@ -131,7 +134,8 @@ export default function Header() {
                 <div className="flex items-center gap-2">
                   <div className="text-sm text-muted-foreground capitalize flex items-center gap-1">
                     <UserCog className="w-4 h-4" />
-                    {role}
+                    {role === "student" ? "Студент" : "Мұғалім"}
+                    
                   </div>
                   <Button variant="ghost" size="icon" onClick={handleChangeRole}>
                     <SwitchCamera className="w-4 h-4" />

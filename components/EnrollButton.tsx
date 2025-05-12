@@ -34,31 +34,16 @@ function EnrollButton({
         href={`/dashboard/courses/${courseId}`}
         className="w-full rounded-lg px-6 py-3 font-medium bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all duration-300 h-12 flex items-center justify-center gap-2 group"
       >
-        <span>Access Course</span>
+        <span>Курсты ашу</span>
         <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
       </Link>
     );
   }
 
-  // Handle enroll button click
-  // const handleEnrollClick = async () => {
-  //   if (user?.id) {
-  //     try {
-  //       await enrollUserInCourse(user?.id, courseId);  // Enroll the user
-  //       router.push(`/dashboard/courses/${courseId}`);  // Redirect after successful enrollment
-  //     } catch (error) {
-  //       // Handle error (e.g., show a notification or alert)
-  //       console.log(error);
-  //     }
-  //   } else {
-  //     // Handle case where user is not signed in
-  //     alert("Please sign in to enroll in the course.");
-  //   }
-  // };
-
+ 
   const handleEnrollClick = async () => {
     if (!user?.id) {
-      alert("Please sign in to enroll in the course.");
+      alert("Курска тіркелу үшін жүйеге кіріңіз.");
       return;
     }
   
@@ -76,7 +61,7 @@ function EnrollButton({
         router.push(`/dashboard/courses/${courseId}`);
       } catch (error: any) {
         console.error("Enrollment error:", error);
-        alert("Failed to enroll: " + error.message);
+        alert("тіркелу сәтсіз аяқталды: " + error.message);
       }
     });
   };
@@ -85,7 +70,7 @@ function EnrollButton({
 
   // Show enroll button only when we're sure user is not enrolled
   return (
-    <button
+  <button
       className={`w-full rounded-lg px-6 py-3 font-medium transition-all duration-300 ease-in-out relative h-12
         ${
           isPending || !user?.id
@@ -98,11 +83,11 @@ function EnrollButton({
     >
       {!user?.id ? (
         <span className={`${isPending ? "opacity-0" : "opacity-100"}`}>
-          Sign in to Enroll
+          Тіркелі үшін кіріңіз
         </span>
       ) : (
         <span className={`${isPending ? "opacity-0" : "opacity-100"}`}>
-          Enroll Now
+          Қазір тіркелу
         </span>
       )}
       {isPending && (

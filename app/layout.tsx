@@ -5,8 +5,9 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import { ToastProvider } from '@/providers/toast-provider';
 import { ConfettiProvider } from '@/providers/confetti-provider';
-
+import { localization } from '@/localization/kz';
 const inter = Inter({ subsets: ['latin'] });
+
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
+    <ClerkProvider localization={localization}>
+      <html lang="kk"> {/* Set the HTML language attribute to Kazakh */}
         <body className={inter.className}>
           <ConfettiProvider />
           <ToastProvider />

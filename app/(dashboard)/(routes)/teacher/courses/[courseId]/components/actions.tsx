@@ -32,17 +32,17 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 
       await axios.patch(endpoint);
 
-      toast.success(isPublished ? 'Course unpublished' : 'Course published');
+      toast.success(isPublished ? 'Курс жобасына ауысты' : 'Курс жарияланды');
       
-      // Trigger confetti if the course was published
+      // Курс жарияланған кезде конфетти көрсетеміз
       if (!isPublished) {
         confetti.onOpen();
       }
 
       router.refresh();
     } catch (error) {
-      console.error(error);  // Log the error for debugging
-      toast.error('Something went wrong');
+      console.error(error);  // Қателерді тексеру үшін
+      toast.error('Қате орын алды');
     } finally {
       setIsLoading(false);
     }
@@ -54,25 +54,25 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
 
       await axios.delete(`/api/courses/${courseId}`);
 
-      toast.success('Course deleted');
-      router.push('/teacher/courses');  // Redirect to courses list after deletion
+      toast.success('Курс жойылды');
+      router.push('/teacher/courses');  // Курс тізіміне қайта бағыттау
     } catch (error) {
-      console.error(error);  // Log the error for debugging
-      toast.error('Something went wrong');
+      console.error(error);  // Қателерді тексеру үшін
+      toast.error('Қате орын алды');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-x-2">
+    <div className="flex items-center gap-x-2 mt-4">
       <Button
         onClick={onClick}
         disabled={disabled || isLoading}
         variant="outline"
         size="sm"
       >
-        {isPublished ? 'Unpublish' : 'Publish'}
+        {isPublished ? 'Жобалау' : 'Жариялау'}
       </Button>
 
       <ConfirmModal onConfirm={onDelete}>

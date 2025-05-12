@@ -71,18 +71,18 @@ const ChaptersList: FC<ChaptersListProps> = ({
       const res = await axios.get(`/api/courses/${courseId}/chapters/${chapterId}/lessons`);
       setChapterLessons((prev) => ({ ...prev, [chapterId]: res.data }));
     } catch {
-      toast.error('Failed to load lessons');
+      toast.error('Сабақтар жүктелмеді');
     }
   };
 
   const handleSave = async (chapterId: string) => {
     try {
-      if (!editedTitle.trim()) return toast.error('Title cannot be empty');
+      if (!editedTitle.trim()) return toast.error('Атауы бос болмауы керек');
 
       await axios.put(`/api/courses/${courseId}/chapters/${chapterId}`, {
         title: editedTitle,
       });
-      toast.success('Chapter title updated');
+      toast.success('Атауы жаңартылды');
 
       const updated = chapters.map((ch) =>
         ch.id === chapterId ? { ...ch, title: editedTitle } : ch
@@ -90,7 +90,7 @@ const ChaptersList: FC<ChaptersListProps> = ({
       setChapters(updated);
       setEditingChapterId(null);
     } catch {
-      toast.error('Failed to update title');
+      toast.error('Атауы жаңартылмады');
     }
   };
 
@@ -98,12 +98,12 @@ const ChaptersList: FC<ChaptersListProps> = ({
   const handleDelete = async (chapterId: string) => {
     try {
       await axios.delete(`/api/courses/${courseId}/chapters/${chapterId}`);
-      toast.success('Chapter deleted');
+      toast.success('Бөлім жойылды');
       
       // Remove the deleted chapter from state
       setChapters((prev) => prev.filter((chapter) => chapter.id !== chapterId));
     } catch {
-      toast.error('Failed to delete chapter');
+      toast.error('Бөлім жойылмады');
     }
   };
 
@@ -171,7 +171,7 @@ const ChaptersList: FC<ChaptersListProps> = ({
                             )}
                             onClick={() => handleSave(chapter.id)}
                           >
-                            Save
+                            Сақтау
                           </Badge>
                         ) : (
                           <Pencil

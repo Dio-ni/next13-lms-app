@@ -5,6 +5,7 @@ export const searchCourses = async (searchTerm: string) => {
   // Fetch all courses that match the search term
   const courses = await db.course.findMany({
     where: {
+      isPublished:true,
       OR: [
         { title: { contains: searchTerm } },
         { description: { contains: searchTerm } },
@@ -12,6 +13,7 @@ export const searchCourses = async (searchTerm: string) => {
       ],
     },
     select: {
+      
       id: true,
       title: true,
       description: true,

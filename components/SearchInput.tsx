@@ -11,7 +11,7 @@ export function SearchInput() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/user/search/${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/search/${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -22,7 +22,7 @@ export function SearchInput() {
     >
       <input
         type="text"
-        placeholder="Search courses..."
+        placeholder="Курстарды іздеу..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full rounded-full bg-secondary/80 px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"

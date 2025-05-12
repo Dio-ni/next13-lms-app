@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 interface CourseProgressProps {
-  progress: number;
+  progress: number | null;
   variant?: "default" | "success";
   size?: "default" | "sm";
   showPercentage?: boolean;

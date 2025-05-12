@@ -21,7 +21,7 @@ interface Module {
 
 export const calculateCourseProgress = (
   modules: Module[],
-  completedLessons: { id: string }[]
+  completedLessons: { id: string | null; }[]
 ): number => {
   let totalLessons = 0;
   let completedCount = 0;

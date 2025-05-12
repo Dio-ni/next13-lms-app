@@ -34,11 +34,11 @@ const CoursesPage = async () => {
       <div className="container mx-auto px-4 py-8">
       {courses.length === 0 ? (
         <div className="text-center text-muted-foreground py-12 flex flex-col">
-          <h1>You haven’t created any courses yet.</h1>
-          <Link href="/user/teacher/create">
+          <h1>Сіз әлі курс жасаған жоқсыз</h1>
+          <Link href="/teacher/create">
           <Button className='mt-4'>
             <PlusCircle className="w-4 h-4 mr-2" />
-            New course
+            Жаңа курс
           </Button>
         </Link>
         </div>

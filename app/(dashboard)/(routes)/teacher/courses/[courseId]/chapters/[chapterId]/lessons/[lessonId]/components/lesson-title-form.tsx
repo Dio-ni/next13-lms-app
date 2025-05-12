@@ -57,25 +57,25 @@ const LessonTitleForm: FC<LessonTitleFormProps> = ({
         `/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`,
         values
       );
-      toast.success('Lesson updated');
+      toast.success('Сабақ жаңартылды');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     }
   };
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Lesson title
+        Сабақ атауы
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
-            'Cancel'
+            'Бас тарту'
           ) : (
             <>
               <Pencil className="w-4 h-4 mr-2" />
-              Edit title
+              Атауын өңдеу
             </>
           )}
         </Button>
@@ -94,7 +94,7 @@ const LessonTitleForm: FC<LessonTitleFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'Introduction to the course'"
+                      placeholder="мысалы: 'Курсқа кіріспе'"
                       {...field}
                     />
                   </FormControl>
@@ -105,7 +105,7 @@ const LessonTitleForm: FC<LessonTitleFormProps> = ({
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 {isSubmitting && <Loading />}
-                Save
+                Сақтау
               </Button>
             </div>
           </form>

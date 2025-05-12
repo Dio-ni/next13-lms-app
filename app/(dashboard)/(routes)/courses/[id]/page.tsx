@@ -6,6 +6,12 @@ import EnrollButton from "@/components/EnrollButton";
 import { isEnrolledInCourse } from "@/actions/isEnrolledInCourse";
 import { currentUser } from "@clerk/nextjs/server";
 import { File } from "lucide-react"; // Make sure this is imported
+import { getCompletedLessons } from "@/actions/getCompletedLessons";
+import { calculateCourseProgress } from "@/actions/calculateCourseProgress";
+import { getCourseInstructor } from "@/actions/getCourseInstructor";
+import { CourseProgress } from "@/components/CourseProgress";
+
+
 
 
 interface CoursePageProps {
@@ -16,6 +22,9 @@ interface CoursePageProps {
 
 export default async function CoursePage({ params }: CoursePageProps) {
   const { id } = await params;
+  
+
+
 
   // Query course data with modules and chapters
   const course = await db.course.findUnique({
@@ -53,7 +62,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   if (!course) {
     return (
       <div className="container mx-auto px-4 py-8 mt-16">
-        <h1 className="text-4xl font-bold">Course not found</h1>
+        <h1 className="text-4xl font-bold">Курс табылмады</h1>
       </div>
     );
   }
@@ -64,11 +73,22 @@ export default async function CoursePage({ params }: CoursePageProps) {
     user?.id && course.id
       ? await isEnrolledInCourse(user?.id, course.id)
       : false;
+  let progress: number | null = null;
+
+  if (isEnrolled && user?.id) {
+    const completedLessons = await getCompletedLessons(course.id);
+    progress = calculateCourseProgress(course.modules, completedLessons);
+  }
+      
+
+  const instructor = await getCourseInstructor(course.id);
+
+  
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background mt-16 ">
       {/* Hero Section */}
-      <div className="relative h-[60vh] w-full">
+      <div className="relative h-[80vh] w-full container">
         {course.imageUrl && (
           <Image
             src={course.imageUrl}
@@ -86,7 +106,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
             className="text-white mb-8 flex items-center hover:text-primary transition-colors w-fit"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
-            Back to Courses
+            Курстарға оралу
           </Link>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -98,55 +118,71 @@ export default async function CoursePage({ params }: CoursePageProps) {
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 {course.title}
               </h1>
-              <p className="text-lg text-white/90 max-w-2xl">
-                {course.description}
-              </p>
+              
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 md:min-w-[300px]">
-              <div className="text-3xl font-bold text-white mb-4">Free</div>
               <EnrollButton courseId={course.id} isEnrolled={isEnrolled} />
             </div>
           </div>
+
+          {progress != null &&(
+            <div className="mt-4">
+              <CourseProgress
+              progress={progress}
+              variant="success"
+              label="Курстың прогрессі"
+            />
+            </div>
+          )}
+          
         </div>
+        
       </div>
 
       {/* Content Section */}
       <div className="container mx-auto px-4 py-12">
+          
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-              <h2 className="text-2xl font-bold mb-4">Course Content</h2>
-              <div className="space-y-4">
-                {course.modules?.map((module, index) => (
-                  <div key={module.id} className="">
-                    
-                      <h3 className="font-medium">
-                        Module {index + 1}: {module.title}
-                      </h3>
-                    
+            <div className="bg-card rounded-2xl p-6 mb-8 border border-border shadow-sm">
+              <h2 className="text-3xl font-bold mb-6">Курстың мазмұны</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mb-8">
+                {course.description}
+              </p>
 
-                    {/* Chapters within the module */}
+              <div className="space-y-6">
+                {course.modules?.map((module, index) => (
+                  <div key={module.id} className="rounded-lg border border-border p-4 bg-muted/5">
+                    <h3 className="text-xl font-semibold mb-4 text-primary">
+                      📘 Модуль {index + 1}: {module.title}
+                    </h3>
+
                     {module.chapters?.map((chapter, chapterIndex) => (
-                      <div key={chapter.id} className="border-t border-border p-4">
-                        <h4 className="font-medium">
-                          Chapter {chapterIndex + 1}: {chapter.title}
+                      <div key={chapter.id} className="pl-4 border-l-4 border-primary/30 mb-6">
+                        <h4 className="text-lg font-semibold mb-3">
+                          📗 Бөлім {chapterIndex + 1}: {chapter.title}
                         </h4>
-                        <div className="space-y-2">
-                          {/* Lessons within the chapter */}
+
+                        <div className="space-y-3">
                           {chapter.lessons?.map((lesson, lessonIndex) => (
                             <div
                               key={lesson.id}
-                              className="p-4 hover:bg-muted/50 transition-colors"
+                              className="flex items-center gap-4 p-3 rounded-md hover:bg-muted transition"
                             >
-                              <div className="flex items-center gap-4">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-medium">
-                                  {lessonIndex + 1}
-                                </div>
-                                <div className="flex items-center gap-3 text-foreground">
-                                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                  <span className="font-medium">{lesson.title}</span>
-                                </div>
+                              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
+                                {lessonIndex + 1}
+                              </div>
+                              <div className="flex items-center gap-2 text-foreground">
+                                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                                <Link
+                                  href={`/dashboard/courses/${course.id}/lessons/${lesson.id}`}
+                                  passHref
+                                  className="font-medium text-primary hover:underline"
+                                >
+                                  {lesson.title}
+                                </Link>
                               </div>
                             </div>
                           ))}
@@ -159,23 +195,65 @@ export default async function CoursePage({ params }: CoursePageProps) {
             </div>
           </div>
 
+
           {/* Sidebar */}
           <div>
             <div className="bg-card rounded-lg p-6 sticky top-4 border border-border">
-              <h2 className="text-xl font-bold mb-4">Instructor</h2>
-              <form action={`/api/courses/${course.id}/certificate/generateCertificate`} method="POST">
-                <button
-                  type="submit"
-                  className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+            <h2 className="text-xl font-bold mb-4">Автор</h2>
+            {instructor ? (
+              <div className="flex items-center gap-3">
+                <img src={instructor.imageUrl} alt={instructor.name} className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-sm font-medium">{instructor.name}</p>
+                  <p className="text-sm text-muted-foreground">{instructor.email}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">Автор табылмады</p>
+            )}
+            
+            {/* Certificate download (only if user is enrolled & has ≥ 80% progress) */}
+            {/* Certificate Section */}
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">Сертификат</h2>
+
+              {!isEnrolled ? (
+                <p className="text-sm text-muted-foreground">
+                  Сертификат алу үшін алдымен курсқа тіркеліңіз және оны кемінде 80% аяқтаңыз.
+                </p>
+              ) : !course.certificateEnabled ? (
+                <p className="text-sm text-muted-foreground">
+                  Бұл курс үшін сертификат қолжетімді емес.
+                </p>
+              ) : progress === null ? (
+                <p className="text-sm text-muted-foreground">
+                  Прогресс анықталмады. Сертификат алу үшін кемінде 80% курсты аяқтауыңыз қажет.
+                </p>
+              ) : progress < 80  ? (
+                <p className="text-sm text-muted-foreground">
+                  Сертификат алу үшін курсты кемінде 80% аяқтаңыз. Сіздің прогрессіңіз: {progress}%.
+                </p>
+              ) : (
+                <form
+                  action={`/api/courses/${course.id}/certificate/generateCertificate`}
+                  method="POST"
                 >
-                  Скачать сертификат
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+                  >
+                    Сертификатты жүктеу
+                  </button>
+                </form>
+              )}
+            </div>
+
              
               <div className="space-y-3 mt-6">
-                <h3 className="font-semibold text-lg">Course Attachments</h3>
+                <h3 className="font-semibold text-lg">Курстың тіркемелері
+                </h3>
                 {course.attachments.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No attachments available.</p>
+                  <p className="text-sm text-muted-foreground">Тіркемелер жоқ.</p>
                 )}
                 {course.attachments.map((attachment) => (
                   <a

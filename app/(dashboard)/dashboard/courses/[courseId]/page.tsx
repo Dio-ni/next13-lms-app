@@ -12,7 +12,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const course = await getCourseById(courseId);
 
   if (!course) {
-    return redirect("/user");
+    return redirect("/");
   }
 
   // Find the first available lesson in the course

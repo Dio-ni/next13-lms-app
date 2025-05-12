@@ -42,30 +42,30 @@ const LessonImageForm: FC<LessonImageFormProps> = ({
         `/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`,
         values
       );
-      toast.success('Lesson image updated');
+      toast.success('Сабақтың суреті жаңартылды');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Бірдеңе дұрыс болмады');
     }
   };
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Lesson image
+      Сабақтың суреті
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
             'Cancel'
           ) : !initialData.imageUrl ? (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add an image
+              Сурет қосу
             </>
           ) : (
             <>
               <Pencil className="w-4 h-4 mr-2" />
-              Edit image
+              Суретті өңдеу
             </>
           )}
         </Button>
@@ -81,7 +81,7 @@ const LessonImageForm: FC<LessonImageFormProps> = ({
             }}
           />
           <div className="mt-4 text-xs text-muted-foreground">
-            16:9 aspect ratio recommended
+          16: 9 форматы ұсынылады
           </div>
         </div>
       ) : !initialData.imageUrl ? (

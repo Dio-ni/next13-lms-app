@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { ChaptersList } from './chapters-list';
-import { ChapterForm } from './chapters-form'; // Form for creating new chapters
+import { ChapterForm } from './chapters-form'; // Жаңа тарау қосу формасы
 
 interface ModulesListProps {
   courseId: string;
@@ -17,7 +17,7 @@ interface ModulesListProps {
   chaptersByModule: { [moduleId: string]: Chapter[] };
   onReorder: (updateData: { id: string; position: number }[]) => void;
   onTitleUpdate: (moduleId: string, newTitle: string) => void;
-  onModuleDelete: (moduleId: string) => void; // Callback for deleting module
+  onModuleDelete: (moduleId: string) => void;
 }
 
 const ModulesList: FC<ModulesListProps> = ({
@@ -26,7 +26,7 @@ const ModulesList: FC<ModulesListProps> = ({
   chaptersByModule,
   onReorder,
   onTitleUpdate,
-  onModuleDelete, // Adding the callback for module delete
+  onModuleDelete,
 }) => {
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState<string>('');
@@ -43,29 +43,26 @@ const ModulesList: FC<ModulesListProps> = ({
 
   const handleSave = async (moduleId: string) => {
     try {
-      if (!editedTitle.trim()) return toast.error('Title cannot be empty');
+      if (!editedTitle.trim()) return toast.error('Атауы бос болмауы керек');
 
       await axios.put(`/api/courses/${courseId}/modules/${moduleId}`, {
         title: editedTitle,
       });
-      toast.success('Module title updated');
+      toast.success('Модуль атауы жаңартылды');
       onTitleUpdate(moduleId, editedTitle);
       setEditingModuleId(null);
     } catch {
-      toast.error('Failed to update title');
+      toast.error('Атауын жаңарту сәтсіз аяқталды');
     }
   };
 
-  // Handle delete module
   const handleDeleteModule = async (moduleId: string) => {
     try {
       await axios.delete(`/api/courses/${courseId}/modules/${moduleId}`);
-      toast.success('Module deleted');
-      
-      // Call the onModuleDelete callback to remove the deleted module from the UI
+      toast.success('Модуль жойылды');
       onModuleDelete(moduleId);
     } catch {
-      toast.error('Failed to delete module');
+      toast.error('Модульді жою сәтсіз аяқталды');
     }
   };
 
@@ -97,7 +94,7 @@ const ModulesList: FC<ModulesListProps> = ({
                   className="text-sm"
                 />
               ) : (
-                <span>{module.title}</span>
+                <span>{module.title || 'Атаусыз модуль'}</span>
               )}
             </div>
 
@@ -107,7 +104,7 @@ const ModulesList: FC<ModulesListProps> = ({
                   className="bg-slate-500 hover:bg-sky-700 text-white cursor-pointer transition-colors"
                   onClick={() => handleSave(module.id)}
                 >
-                  Save
+                  Сақтау
                 </Badge>
               ) : (
                 <Pencil
@@ -116,7 +113,7 @@ const ModulesList: FC<ModulesListProps> = ({
                 />
               )}
               <Trash
-                onClick={() => handleDeleteModule(module.id)} // Change this to delete the module, not chapter
+                onClick={() => handleDeleteModule(module.id)}
                 className="w-4 h-4 cursor-pointer hover:opacity-75 text-red-500"
               />
             </div>

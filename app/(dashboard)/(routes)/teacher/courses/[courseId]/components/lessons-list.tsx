@@ -49,55 +49,57 @@ const LessonsList: FC<LessonsListProps> = ({ items, onEdit, onReorder }) => {
     setLessons(items);
   }, [items]);
 
-  if (!isMounted) null;
+  if (!isMounted) return null;
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="Lessons">
-        {(provider) => (
-          <div {...provider.droppableProps} ref={provider.innerRef}>
-            {Lessons.map((chapter, index) => (
-              <Draggable
-                key={chapter.id}
-                draggableId={chapter.id}
-                index={index}
-              >
-                {(provided) => (
-                  <div
-                    {...provided.draggableProps}
-                    ref={provided.innerRef}
-                    className={cn(
-                      'flex items-center gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm',
-                      
-                        'bg-sky-100 border-sky-200 text-sky-700'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'px-2 py-3 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
+    <div>
+      <h2 className="text-base font-semibold mb-4">Сабақтар тізімі</h2>
 
-                          'border-r-sky-200 hover:bg-sky-200'
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="Sabaktar">
+          {(provider) => (
+            <div {...provider.droppableProps} ref={provider.innerRef}>
+              {Lessons.map((chapter, index) => (
+                <Draggable
+                  key={chapter.id}
+                  draggableId={chapter.id}
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      {...provided.draggableProps}
+                      ref={provided.innerRef}
+                      className={cn(
+                        'flex items-center gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm',
+                        'bg-sky-100 border-sky-200 text-sky-700'
                       )}
-                      {...provided.dragHandleProps}
                     >
-                      <Grip className="w-5 h-5" />
+                      <div
+                        className={cn(
+                          'px-2 py-3 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition',
+                          'border-r-sky-200 hover:bg-sky-200'
+                        )}
+                        {...provided.dragHandleProps}
+                      >
+                        <Grip className="w-5 h-5" />
+                      </div>
+                      <span>{chapter.title || 'Атаусыз сабақ'}</span>
+                      <div className="flex items-center pr-2 ml-auto gap-x-2">
+                        <Pencil
+                          onClick={() => onEdit(chapter.id)}
+                          className="w-4 h-4 transition cursor-pointer hover:opacity-75"
+                        />
+                      </div>
                     </div>
-                    {chapter.title}
-                    <div className="flex items-center pr-2 ml-auto gap-x-2">
-                      <Pencil
-                        onClick={() => onEdit(chapter.id)}
-                        className="w-4 h-4 transition cursor-pointer hover:opacity-75"
-                      />
-                    </div>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provider.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+                  )}
+                </Draggable>
+              ))}
+              {provider.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
   );
 };
 

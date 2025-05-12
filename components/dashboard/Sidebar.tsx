@@ -61,26 +61,52 @@ interface SidebarProps {
 export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
   const pathname = usePathname();
   const { isOpen, toggle, close } = useSidebar();
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(true);
   const [openModules, setOpenModules] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
 
   // Sync the opened modules with the pathname
   useEffect(() => {
     if (pathname && course?.modules) {
-      const currentChapterId = course.modules
+      // Find the current lesson based on the pathname
+      const currentLessonId = course.modules
         .flatMap((module) => module.chapters)
-        .find((chapter) =>
-          pathname.includes(`/dashboard/courses/${course.id}/lessons/${chapter.id}`)
+        .flatMap((chapter) => chapter.lessons)
+        .find((lesson) =>
+          pathname.includes(`/dashboard/courses/${course.id}/lessons/${lesson.id}`)
         )?.id;
-
-      if (currentChapterId && !openModules.includes(currentChapterId)) {
-        setOpenModules((prev) => [...prev, currentChapterId]);
+  
+      if (currentLessonId) {
+        // Find the chapter that contains the current lesson
+        const currentChapterId = course.modules
+          .flatMap((module) => module.chapters)
+          .find((chapter) =>
+            chapter.lessons.some((lesson) => lesson.id === currentLessonId)
+          )?.id;
+  
+        // Find the module that contains the current chapter
+        const currentModuleId = course.modules.find((module) =>
+          module.chapters.some((chapter) => chapter.id === currentChapterId)
+        )?.id;
+  
+        // Open the corresponding module if it's not already open
+        // setOpenModules((prev) => {
+        //   // Only open the current module if it is not already open
+        //   if (currentModuleId && !prev.includes(currentModuleId)) {
+        //     return [...prev, currentModuleId];
+        //   }
+        //   return prev;
+        // });
+      } else {
+        // If there is no current lesson, close all modules
+        setOpenModules([]);
       }
     }
-    setProgress(calculateCourseProgress(course.modules , completedLessons)); // Recalculate progress
+  
+    // Recalculate the course progress
+    setProgress(calculateCourseProgress(course.modules, completedLessons)); 
   }, [pathname, course, openModules, completedLessons]);
-
+  
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -94,13 +120,13 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
       <div className="p-4 lg:p-6 border-b flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
           <Link
-            href="/user/my-courses"
+            href={`/courses/${course.id}`}
             className="flex items-center gap-x-2 text-sm hover:text-primary transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             <div className="flex items-center gap-x-2">
               <Library className="h-4 w-4" />
-              <span>Course Library</span>
+              <span>Курска қайта оралу</span>
             </div>
           </Link>
           <div className="space-x-2">
@@ -116,6 +142,11 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
         </div>
         <div className="space-y-4">
           <h1 className="font-semibold text-2xl">{course.title}</h1>
+          <CourseProgress
+              progress={progress}
+              variant="success"
+              label="Курстың прогрессі"
+            />
         </div>
       </div>
       <ScrollArea className="flex-1">
@@ -152,7 +183,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
                       {/* Redesigned Chapter Header */}
                       <div className="px-4 py-2 bg-muted rounded-md flex items-center gap-x-2 mb-2">
                         <div className="text-xs font-semibold text-muted-foreground tracking-wide">
-                          Chapter {chapterIndex + 1}:
+                          Бөлім {chapterIndex + 1}:
                         </div>
                         <div className="text-sm font-medium text-foreground truncate">
                           {chapter.title}

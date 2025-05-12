@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 import { useRouter } from 'next/navigation';
+
 interface Lesson {
   id: string;
   title: string;
@@ -35,7 +36,7 @@ interface LessonFormProps {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Атау міндетті'),
 });
 
 const LessonForm: FC<LessonFormProps> = ({
@@ -59,31 +60,32 @@ const LessonForm: FC<LessonFormProps> = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.post(`/api/courses/${courseId}/chapters/${chapterId}/lessons`, values);
-      toast.success('Lesson created');
+      toast.success('Сабақ құрылды');
       form.reset();
       onLessonCreated();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қателік пайда болды');
     }
   };
-  const onEditLesson = ( lessonId: string) => {
-    // Navigate to the lesson edit page using next/router
-    router.push(`/user/teacher/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
+  
+  const onEditLesson = (lessonId: string) => {
+    // Сабақтың өңдеу бетіне бағыттау
+    router.push(`/teacher/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`);
   };
 
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between mb-1 font-medium text-slate-600">
-        Lessons
+        Сабақтар
         <Button
           variant="ghost"
           type="button"
           onClick={() => setIsCreating((prev) => !prev)}
         >
-          {isCreating ? 'Cancel' : (
+          {isCreating ? 'Бас тарту' : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add Lesson
+              Сабақ қосу
             </>
           )}
         </Button>
@@ -100,7 +102,7 @@ const LessonForm: FC<LessonFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="Lesson title"
+                      placeholder="Сабақтың атауы"
                       {...field}
                     />
                   </FormControl>
@@ -110,7 +112,7 @@ const LessonForm: FC<LessonFormProps> = ({
             />
             <Button disabled={!isValid || isSubmitting} type="submit">
               {isSubmitting && <Loading />}
-              Create Lesson
+              Сабақ құру
             </Button>
           </form>
         </Form>
@@ -124,18 +126,16 @@ const LessonForm: FC<LessonFormProps> = ({
               className="text-sm  flex justify-between items-center"
             >
               <span>{lesson.title}</span>
-              {/* {onEditLesson && ( */}
-                <button
-                  onClick={() => onEditLesson(lesson.id)}
-                  className="hover:opacity-70"
-                >
-                  <Pencil className="w-4 h-4 text-muted-foreground" />
-                </button>
-              {/* )} */}
+              <button
+                onClick={() => onEditLesson(lesson.id)}
+                className="hover:opacity-70"
+              >
+                <Pencil className="w-4 h-4 text-muted-foreground" />
+              </button>
             </li>
           ))
         ) : (
-          <li className="text-sm italic text-muted-foreground">No lessons yet.</li>
+          <li className="text-sm italic text-muted-foreground">Әзірге сабақтар жоқ.</li>
         )}
       </ul>
     </div>

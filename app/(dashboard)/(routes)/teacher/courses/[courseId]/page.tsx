@@ -91,22 +91,22 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
   const isComplete = requiredFields.every(Boolean);
 
   return (
-    <>
+    <div className="mt-16">
       {!course.isPublished && (
-        <Banner label="This course is unpublished. It will not be visible to the students." />
+        <Banner label="Бұл курс жарияланбаған. Ол студенттерге көрінбейді." />
       )}
-      <div className=" h-full pt-16 container">
-        <div className="mx-auto px-4 py-8">
+    <div className=" h-full mb-8 container pt-4">
+        <div className="mx-auto  ">
           <div className="flex flex-col gap-y-2">
           <Link
-              href={`/user/teacher/courses`}
+              href={`/teacher/courses`}
               className="flex items-center mb-6 text-sm transition hover:opacity-75"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to courses
+              <ArrowLeft className="w-4 h-4 mr-2" /> Курстарға қайту
             </Link>
-            <h1 className="text-2xl font-medium">Course setup</h1>
+            <h1 className="text-2xl font-medium">Курс параметрлерін орнату</h1>
             <span className="text-sm text-slate-700">
-              Complete all fields {completionText}
+            Барлық өрістерді толтырыңыз {completionText}
             </span>
           </div>
           <Actions
@@ -119,7 +119,7 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
           <div>
             <div className="flex items-center gap-x-2">
               <IconBadge icon={LayoutDashboard} />
-              <h2 className="text-xl">Customize your course</h2>
+              <h2 className="text-xl">Курс параметрлерін реттеңіз</h2>
             </div>
             <TitleForm initialData={course} courseId={params.courseId} />
             <DescriptionForm initialData={course} courseId={params.courseId} />
@@ -135,7 +135,7 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
             <div>
               <div className="flex items-center gap-x-2 mt-6">
                 <IconBadge icon={ListChecks} />
-                <h2 className="text-xl">Course Quiz</h2>
+                <h2 className="text-xl">Курс сертификаты</h2>
               </div>
               <div className="m-6">
                 <CertificateToggleForm 
@@ -163,7 +163,7 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ListChecks} />
-                <h2 className="text-xl">Course Chapters</h2>
+                <h2 className="text-xl">Курс модульдері</h2>
               </div>
               <ModulesForm initialData={course} courseId={params.courseId} />
             </div>
@@ -172,14 +172,14 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={File} />
-                <h2 className="text-xl">Resources & Attachments</h2>
+                <h2 className="text-xl">Ресурстар және тіркемелер</h2>
               </div>
               <AttachmentForm initialData={course} courseId={params.courseId} />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

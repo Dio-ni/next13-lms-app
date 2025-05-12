@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 
 // Fetch enrolled courses for a given userId
-export async function getEnrolledCourses(userId: string) {
+export async function getEnrolledCourses(userId?: string) {
   try {
     const enrollments = await db.enrollment.findMany({
       where: {

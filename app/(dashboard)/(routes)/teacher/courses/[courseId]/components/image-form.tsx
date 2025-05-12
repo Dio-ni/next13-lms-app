@@ -19,7 +19,7 @@ interface ImageFormProps {
 
 const formSchema = z.object({
   imageUrl: z.string().min(1, {
-    message: 'Image is required',
+    message: 'Сурет міндетті',
   }),
 });
 
@@ -32,30 +32,30 @@ const ImageForm: FC<ImageFormProps> = ({ courseId, initialData }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success('Course updated');
+      toast.success('Курс сәтті жаңартылды');
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     }
   };
 
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Course image
+        Курстың суреті
         <Button variant="ghost" type="button" onClick={toggleEdit}>
           {isEditing ? (
-            'Cancel'
+            'Бас тарту'
           ) : !initialData.imageUrl ? (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add an image
+              Сурет қосу
             </>
           ) : (
             <>
               <Pencil className="w-4 h-4 mr-2" />
-              Edit image
+              Суретті өзгерту
             </>
           )}
         </Button>
@@ -71,7 +71,7 @@ const ImageForm: FC<ImageFormProps> = ({ courseId, initialData }) => {
             }}
           />
           <div className="mt-4 text-xs text-muted-foreground">
-            16:9 aspect ratio recommended
+            16:9 арақатынастағы сурет ұсынылады
           </div>
         </div>
       ) : !initialData.imageUrl ? (
@@ -81,7 +81,7 @@ const ImageForm: FC<ImageFormProps> = ({ courseId, initialData }) => {
       ) : (
         <div className="relative mt-2 aspect-video">
           <Image
-            alt="Upload"
+            alt="Жүктелген сурет"
             fill
             className="object-cover rounded-md"
             src={initialData.imageUrl}

@@ -41,7 +41,7 @@ const CreatePage = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const response = await axios.post('/api/courses', values);
-      router.push(`/user/teacher/courses/${response.data.id}`);
+      router.push(`/teacher/courses/${response.data.id}`);
       toast.success('Course created');
     } catch (error) {
       toast.error('Something went wrong');
@@ -83,7 +83,7 @@ const CreatePage = () => {
               )}
             />
             <div className="flex items-center gap-x-2">
-              <Link href="/user/teacher/courses">
+              <Link href="/teacher/courses">
                 <Button variant="secondary">Cancel</Button>
               </Link>
               <Button type="submit" disabled={!isValid || isSubmitting}>

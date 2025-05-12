@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ChaptersList } from './chapters-list';
 
 const schema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Атауы қажет'),
 });
 
 interface ChapterFormProps {
@@ -46,7 +46,7 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
       );
       setChapters(res.data);
     } catch {
-      toast.error('Failed to load chapters');
+      toast.error('Тараулар жүктелмеді');
     }
   };
 
@@ -60,12 +60,12 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
         `/api/courses/${courseId}/modules/${moduleId}/chapters`,
         values
       );
-      toast.success('Chapter created');
+      toast.success('Бөлім құрылды');
       form.reset();
       setCreating(false);
       setChapters((prev) => [...prev, res.data]);
     } catch {
-      toast.error('Failed to create chapter');
+      toast.error('Бөлім жасалмады.');
     }
   };
 
@@ -76,10 +76,10 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
         `/api/courses/${courseId}/modules/${moduleId}/chapters/reorder`,
         { list: data }
       );
-      toast.success('Chapters reordered');
+      toast.success('Бөлімдер қайта реттелді');
       await fetchChapters();
     } catch {
-      toast.error('Failed to reorder chapters');
+      toast.error('Бөлімдердің ретін өзгерту мүмкін болмады');
     } finally {
       setIsReordering(false);
     }
@@ -88,12 +88,12 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
   return (
     <div className="border rounded-md p-4 bg-white mt-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Chapters</h3>
+        <h3 className="font-semibold">Бөлімдер</h3>
         <Button variant="ghost" onClick={() => setCreating(!creating)}>
-          {creating ? 'Cancel' : (
+          {creating ? 'Бас тарту' : (
             <>
               <PlusCircle className="w-4 h-4 mr-2" />
-              Add Chapter
+              Бөлім қосу
             </>
           )}
         </Button>
@@ -111,7 +111,7 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Chapter title" {...field} />
+                    <Input placeholder="Бөлім атауы" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +125,7 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
               {form.formState.isSubmitting && (
                 <Loader2 className="animate-spin w-4 h-4 mr-2" />
               )}
-              Create Chapter
+              Бөлум қосу
             </Button>
           </form>
         </Form>
@@ -134,7 +134,7 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
       {isReordering && (
         <div className="mt-4 text-sm text-sky-600 flex items-center">
           <Loader2 className="animate-spin w-4 h-4 mr-2" />
-          Reordering...
+          Ретін өзгерту...
         </div>
       )}
 

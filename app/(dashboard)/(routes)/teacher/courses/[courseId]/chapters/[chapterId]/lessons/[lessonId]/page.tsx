@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { LessonTitleForm } from './components/lesson-title-form';
 import { LessonContentForm } from './components/lesson-content-form';
 import { LessonVideoForm } from './components/lesson-video-form';
-// // import { LessonVideoForm } from './components/lesson-video-form';
 // import { LessonImageForm } from './components/lesson-image-form';
 import { Actions } from './components/actions';
 import { LessonImageForm } from './components/image-form';
@@ -48,16 +47,16 @@ const LessonIdPage = async ({
         <div className="flex items-center justify-between mt-14">
           <div className="w-full">
             <Link
-              href={`/user/teacher/courses/${params.courseId}`}
+              href={`/teacher/courses/${params.courseId}`}
               className="flex items-center mb-6  text-sm transition hover:opacity-75"
             >
-              <ArrowLeft className="w-4 h-4 mr-2 " /> Back to course setup
+              <ArrowLeft className="w-4 h-4 mr-2 " /> Курсты өңдеуге оралу
             </Link>
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col gap-y-2">
-                <h1 className="text-2xl font-medium">Lesson Creation</h1>
+                <h1 className="text-2xl font-medium">Сабақты құру</h1>
                 <span className="text-sm text-slate-700">
-                  Complete all fields {completionText}
+                Барлық міндетті өрістерді толтырыңыз {completionText}
                 </span>
               </div>
               <div>
@@ -76,7 +75,7 @@ const LessonIdPage = async ({
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={LayoutDashboard} />
-                <h2 className="text-xl">Customize your lesson</h2>
+                <h2 className="text-xl">Сабағыңызды реттеңіз</h2>
               </div>
               <LessonTitleForm
                 lessonId={params.lessonId}
@@ -89,7 +88,7 @@ const LessonIdPage = async ({
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={Eye} />
-                <h2 className="text-xl">Lesson Content</h2>
+                <h2 className="text-xl">Сабақтың мазмұны</h2>
               </div>
               <LessonContentForm
                 chapterId= {params.chapterId}
@@ -103,7 +102,7 @@ const LessonIdPage = async ({
             {/* Lesson Video URL Form */}
             <div className="flex items-center gap-x-2">
               <IconBadge icon={Video} />
-              <h2 className="text-xl">Add a video</h2>
+              <h2 className="text-xl">Бейне сілтемесін қосыңыз</h2>
             </div>
             <LessonVideoForm
               initialData={lesson}
@@ -118,6 +117,7 @@ const LessonIdPage = async ({
               courseId={params.courseId}
               chapterId={params.chapterId}
             /> */}
+            
              <LessonImageForm 
               initialData={lesson}
               lessonId={params.lessonId}

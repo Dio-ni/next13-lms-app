@@ -28,7 +28,7 @@ interface LessonVideoFormProps {
 }
 
 const formSchema = z.object({
-  videoUrl: z.string().url('Please enter a valid URL').min(1, 'Video URL is required'),
+  videoUrl: z.string().url('Құрылғыға жарамды URL енгізіңіз').min(1, 'Бейнемазмұн URL мекенжайы қажет'),
 });
 
 const LessonVideoForm: FC<LessonVideoFormProps> = ({
@@ -44,7 +44,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      videoUrl: initialData.videoUrl || '', // Fallback to an empty string if videoUrl is null or undefined
+      videoUrl: initialData.videoUrl || '', // Егер videoUrl null немесе undefined болса, бос жолды қайтарамыз
     },
   });
 
@@ -53,17 +53,17 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await axios.patch(`/api/courses/${courseId}/chapters/${chapterId}/lessons/${lessonId}`, values);
-      toast.success('Video URL updated');
+      toast.success('Бейнемазмұн URL мекенжайы жаңартылды');
       toggleEdit();
       window.location.reload();
     } catch {
-      toast.error('Something went wrong');
+      toast.error('Қате орын алды');
     }
   };
 
-  // Function to check if it's a valid YouTube URL and format it
+  // YouTube URL тексеру және пішімдеу функциясы
   const getYouTubeEmbedUrl = (url: string) => {
-    console.log("Checking video URL:", url);  // Log the URL to check
+    console.log("Бейнемазмұн URL мекенжайын тексеру:", url);  // URL-ді тексеру үшін логта көрсетеміз
     const youtubeRegex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:[^\/]+\/\S+\/|(?:v|e(?:mbed)?)\/([a-zA-Z0-9_-]+)|(?:.*[?&]v=)([a-zA-Z0-9_-]+))|youtu\.be\/([a-zA-Z0-9_-]+))/;
     const match = url.match(youtubeRegex);
 
@@ -81,9 +81,9 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between font-medium">
-        Add Video URL
+        Бейнемазмұн URL мекенжайын қосу
         <Button variant="ghost" type="button" onClick={toggleEdit}>
-          {isEditing ? 'Cancel' : 'Edit Video URL'}
+          {isEditing ? 'Бас тарту' : 'Өңдеу'}
         </Button>
       </div>
       {isEditing ? (
@@ -97,7 +97,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'https://video-link.com'"
+                      placeholder="мысалы: 'https://video-link.com'"
                       {...field}
                     />
                   </FormControl>
@@ -108,7 +108,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
             <div className="flex items-center gap-x-2">
               <Button disabled={!isValid || isSubmitting} type="submit">
                 {isSubmitting && <Loading />}
-                Save
+                Сақтау
               </Button>
             </div>
           </form>
@@ -124,7 +124,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
                 width="100%"
                 height="100%"
                 src={videoUrl}
-                title="Video"
+                title="Бейнемазмұн"
                 frameBorder="0"
                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -132,7 +132,7 @@ const LessonVideoForm: FC<LessonVideoFormProps> = ({
               ></iframe>
             </div>
           ) : (
-            'No video URL available'
+            'Бейне URL мекенжайы жоқ'
           )}
         </div>
       )}
