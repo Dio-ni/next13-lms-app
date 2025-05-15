@@ -29,13 +29,15 @@ export const InstructorsSection = () => {
           {instructors.map((instructor, index) => (
             <Card key={index} className="border hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden mx-auto mb-4">
+                <div className="relative w-24 h-24 bg-gray-200 rounded-full overflow-hidden mx-auto mb-4">
                   <Image
                     src={instructor.img.src}
                     alt={instructor.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
+
                 <h3 className="text-xl font-semibold text-center">{instructor.name}</h3>
                 <p className="text-primary text-center">{instructor.title}</p>
               </CardHeader>
