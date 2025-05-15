@@ -27,12 +27,19 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (isSignedIn) {
-      const storedRole = localStorage.getItem("role") as Role | null;
-      setRole(storedRole);
+useEffect(() => {
+  if (isSignedIn) {
+    let storedRole = localStorage.getItem("role") as Role | null;
+
+    // If no role stored, default to student or fetch from DB/user metadata
+    if (!storedRole) {
+      storedRole = "student";
+      localStorage.setItem("role", storedRole);
     }
-  }, [isSignedIn]);
+
+    setRole(storedRole);
+  }
+}, [isSignedIn]);
 
   const handleChangeRole = () => {
     const newRole = role === "student" ? "teacher" : "student";
@@ -119,9 +126,10 @@ export default function Header() {
               <GuestNav />
             </SignedOut>
             <SignedIn>
-              {role === "student" && <StudentNav />}
-              {role === "teacher" && <TeacherNav />}
-            </SignedIn>
+                {role ? (
+                  role === "student" ? <StudentNav /> : <TeacherNav />
+                ) : null}
+              </SignedIn>
           </div>
 
           <div className="flex items-center gap-4">
