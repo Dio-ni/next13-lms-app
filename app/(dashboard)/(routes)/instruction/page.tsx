@@ -47,11 +47,16 @@ const InstructionPage = () => {
           <div key={index} className="bg-white rounded-2xl shadow p-6">
             <h2 className="text-xl font-semibold mb-4">{step.title}</h2>
             {step.image && (
-              <Image
-                src={step.image}
-                alt={step.title}
-                className="w-full rounded-lg mb-4 border"
-              />
+              <div className="relative w-full aspect-video h-auto rounded-lg mb-4 border">
+                  <Image
+                    src={step.image}
+                    alt={step.title}
+                    fill
+                    className="object-contain rounded-lg"
+                  />
+                </div>
+
+
             )}
             <p className="text-gray-700">{step.description}</p>
           </div>
