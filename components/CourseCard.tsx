@@ -34,7 +34,7 @@ const CourseCard = ({
             //   fill
             //   className="object-cover transition-transform duration-300 group-hover:scale-110"
             // />
-            <img
+            <Image
               src={imageUrl}
               alt={title || "Course Title"}
               className="object-cover w-full h-full"

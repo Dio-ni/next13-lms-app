@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Chapter } from '@prisma/client';
 import axios from 'axios';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {  useCallback,useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -39,7 +39,8 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
     defaultValues: { title: '' },
   });
 
-  const fetchChapters = async () => {
+
+  const fetchChapters = useCallback(async () => {
     try {
       const res = await axios.get(
         `/api/courses/${courseId}/modules/${moduleId}/chapters`
@@ -48,11 +49,12 @@ export const ChapterForm = ({ courseId, moduleId }: ChapterFormProps) => {
     } catch {
       toast.error('Тараулар жүктелмеді');
     }
-  };
+}, [courseId, moduleId]); // ✅ dependencies used inside the function
+
 
   useEffect(() => {
     fetchChapters();
-  }, [moduleId]);
+  }, [fetchChapters]);
 
   const onCreate = async (values: z.infer<typeof schema>) => {
     try {

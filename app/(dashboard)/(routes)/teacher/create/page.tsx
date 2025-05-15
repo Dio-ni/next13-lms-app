@@ -25,7 +25,7 @@ const CreatePage = () => {
 
   const formSchema = z.object({
     title: z.string().min(1, {
-      message: 'Title is required',
+      message: 'Атауы міндетті түрде болуы керек',
     }),
   });
 
@@ -42,18 +42,18 @@ const CreatePage = () => {
     try {
       const response = await axios.post('/api/courses', values);
       router.push(`/teacher/courses/${response.data.id}`);
-      toast.success('Course created');
+      toast.success('Курс сәтті жасалды');
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error('Қате пайда болды');
     }
   };
 
   return (
     <div className="h-full pt-16 flex h-full max-w-5xl p-6 mx-auto md:items-center md:justify-center">
       <div className='container mx-auto px-4 py-8'>
-        <h1 className="text-2xl">Name your course</h1>
+        <h1 className="text-2xl">Курсыңыздың атауын енгізіңіз</h1>
         <p className="text-sm text-slate-600">
-          Give your course a name. You can always change it later.
+          Курсыңызға атау беріңіз. Кейін оны өзгертуіңізге болады.
         </p>
         <Form {...form}>
           <form
@@ -66,17 +66,17 @@ const CreatePage = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Course title <span className="text-red-500">*</span>
+                    Курс атауы <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       disabled={isSubmitting}
-                      placeholder='e.g. "Intro to Computer Science"'
+                      placeholder='мәселен, "Информатикаға кіріспе"'
                     />
                   </FormControl>
                   <FormDescription>
-                    What is the name of your course?
+                    Курсыңыздың атауы қандай болмақ?
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -84,17 +84,16 @@ const CreatePage = () => {
             />
             <div className="flex items-center gap-x-2">
               <Link href="/teacher/courses">
-                <Button variant="secondary">Cancel</Button>
+                <Button variant="secondary">Болдырмау</Button>
               </Link>
               <Button type="submit" disabled={!isValid || isSubmitting}>
-                Continue
+                Келесі
               </Button>
             </div>
           </form>
         </Form>
       </div>
     </div>
-    
   );
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { Chapter, Lesson } from '@prisma/client';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import {
   DragDropContext,
   Droppable,
@@ -66,14 +66,17 @@ const ChaptersList: FC<ChaptersListProps> = ({
     setEditedTitle('');
   };
 
-  const loadLessons = async (chapterId: string) => {
+  const loadLessons = useCallback(
+  async (chapterId: string) => {
     try {
       const res = await axios.get(`/api/courses/${courseId}/chapters/${chapterId}/lessons`);
       setChapterLessons((prev) => ({ ...prev, [chapterId]: res.data }));
     } catch {
       toast.error('Сабақтар жүктелмеді');
     }
-  };
+  },
+  [courseId] // <- only dependency
+);
 
   const handleSave = async (chapterId: string) => {
     try {
@@ -115,7 +118,7 @@ const ChaptersList: FC<ChaptersListProps> = ({
   useEffect(() => {
     setChapters(items);
     items.forEach((chapter) => loadLessons(chapter.id));
-  }, [items]);
+  }, [items, loadLessons]);
 
   if (!isMounted) return null;
 

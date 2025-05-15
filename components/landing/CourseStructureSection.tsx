@@ -15,8 +15,8 @@ export const CourseStructureSection = () => {
     },
     {
       icon: <MessageCircle className="h-8 w-8 text-primary" />,
-      title: "Тапсырмалар",
-      description: "Практикалық жұмыстар мен тесттер"
+      title: "Сабақ сипаттамасы",
+      description: "Видеоға мәтіндік сипаттама қосуға және файлдарды тіркеуге болады"
     },
     {
       icon: <Award className="h-8 w-8 text-primary" />,
