@@ -12,6 +12,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next export",
+
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
@@ -47,8 +49,10 @@
     "next13-lms-app": "file:",
     "pdf-lib": "^1.17.1",
     "query-string": "^8.1.0",
+    "radix-ui": "^1.4.1",
     "react": "^18",
     "react-confetti": "^6.1.0",
+    "react-day-picker": "^9.7.0",
     "react-dom": "^18",
     "react-hook-form": "^7.47.0",
     "react-hot-toast": "^2.4.1",

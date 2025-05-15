@@ -21,7 +21,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
           <div>
             <h1 className="text-3xl font-bold">Іздеу нәтижелері</h1>
             <p className="text-muted-foreground">
-            "{decodedTerm}" бойынша {courses.length} нәтиже{courses.length === 1 ? "" : "лер"} табылды
+            &quot;{decodedTerm}&quot; бойынша {courses.length} нәтиже{courses.length === 1 ? "" : "лер"} табылды
 
             </p>
           </div>

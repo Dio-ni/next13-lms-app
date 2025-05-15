@@ -11,7 +11,7 @@ export const FeaturesSection = () => {
     {
       icon: <Award className="h-8 w-8 text-primary" />,
       title: "Сертификаттау",
-      description: "Курсты аяқтағаннан кейін ресми сертификат алыңыз"
+      description: "Курсты аяқтағаннан кейін сертификат алыңыз"
     },
     {
       icon: <Video className="h-8 w-8 text-primary" />,

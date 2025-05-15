@@ -34,7 +34,7 @@ export async function PUT(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const module = await db.module.update({
+    const coursemodule = await db.module.update({
       where: {
         id: params.moduleId,
         courseId: params.courseId,
@@ -44,7 +44,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(module);
+    return NextResponse.json(coursemodule);
   } catch (error) {
     console.error('[MODULE_UPDATE_ERROR]', error);
     return new NextResponse('Internal Error', { status: 500 });
@@ -75,14 +75,14 @@ export async function DELETE(
         return new NextResponse('Unauthorized', { status: 401 });
       }
 
-      const module = await db.module.findUnique({
+      const coursemodule = await db.module.findUnique({
         where: {
           id: params.moduleId,
           courseId: params.courseId,
         },
       });
 
-      if (!module) {
+      if (!coursemodule) {
         return new NextResponse('Module not found', { status: 404 });
       }
 

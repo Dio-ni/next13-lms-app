@@ -17,7 +17,7 @@ const Index = () => {
       <UserRolesSection />
       <CourseSection />
       <InstructorsSection />
-      <ComparisonSection />
+      {/* <ComparisonSection /> */}
       <Footer /> {/* New Footer component */}
     </div>
   );

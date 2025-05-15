@@ -85,6 +85,7 @@ export default function Header() {
   const GuestNav = () => (
     <nav className="flex gap-4 items-center">
       <NavLink href="/" label="Курстар" />
+      <NavLink href="/instruction" label="Нұсқаулық " />
     </nav>
   );
 
@@ -94,6 +95,8 @@ export default function Header() {
       
       <NavLink href="/courses-list" label="Барлық курстар" />
       <NavLink href="/my-courses" label="Менің курстарым" />
+      
+      <NavLink href="/instruction" label="Нұсқаулық " />
     </nav>
   );
 
@@ -101,6 +104,7 @@ export default function Header() {
     <nav className="flex gap-4 items-center">
       <NavLink href="/" label="Басты бет" />
       <NavLink href="/teacher/courses" label="Менің курстарым" />
+      <NavLink href="/instruction" label="Нұсқаулық " />
     </nav>
   );
 

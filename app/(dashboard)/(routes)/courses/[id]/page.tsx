@@ -49,6 +49,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   id: true,
                   title: true,
                   content: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  videoUrl: true,
+                  chapterId: true,
                 },
               },
             },
@@ -202,7 +206,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
             <h2 className="text-xl font-bold mb-4">Автор</h2>
             {instructor ? (
               <div className="flex items-center gap-3">
-                <img src={instructor.imageUrl} alt={instructor.name} className="w-10 h-10 rounded-full" />
+                <Image src={instructor.imageUrl} alt={instructor.name} className="w-10 h-10 rounded-full" />
                 <div>
                   <p className="text-sm font-medium">{instructor.name}</p>
                   <p className="text-sm text-muted-foreground">{instructor.email}</p>
