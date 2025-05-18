@@ -2,7 +2,7 @@
 const nextConfig = {
   
   images: {
-    domains: ['utfs.io'], // ← Add correct CDN if used
+    domains: ['utfs.io','img.clerk.com'], // ← Add correct CDN if used
   },
     
 };

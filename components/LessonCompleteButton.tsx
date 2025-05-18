@@ -71,13 +71,13 @@ export function LessonCompleteButton({
         <div className="flex-1">
           <p className="text-sm font-medium">
             {isCompleted
-              ? "Lesson completed!"
-              : "Ready to complete this lesson?"}
+              ? "Сабақ аяқталды!"
+              : "Осы сабақты аяқтауға дайынсың ба?"}
           </p>
           <p className="text-sm text-muted-foreground">
             {isCompleted
-              ? "You can mark it as incomplete if you need to revisit it."
-              : "Mark it as complete when you're done."}
+              ? "Қажет болса, оны қайтадан аяқталмаған деп белгілей аласың"
+              : "Аяқтаған соң — «Аяқталды» деп белгіле."}
           </p>
         </div>
         <Button
@@ -95,22 +95,22 @@ export function LessonCompleteButton({
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating...
+              Жаңартылуда...
             </>
           ) : isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {isCompleted ? "Uncompleting..." : "Completing..."}
+              {isCompleted ? "Аяқтаудан бас тарту..." : "Аяқталуда..."}
             </>
           ) : isCompleted ? (
             <>
               <XCircle className="h-4 w-4 mr-2" />
-              Mark as Not Complete
+              Аяқталмаған деп белгіле
             </>
           ) : (
             <>
               <CheckCircle className="h-4 w-4 mr-2" />
-              Mark as Complete
+              Аяқталды деп белгіле
             </>
           )}
         </Button>

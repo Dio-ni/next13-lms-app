@@ -37,6 +37,8 @@ const CourseCard = ({
             <Image
               src={imageUrl}
               alt={title || "Course Title"}
+              width={400}
+              height={250}
               className="object-cover w-full h-full"
               loading="lazy" // Optional: This will defer loading of the image until it's needed
             />
