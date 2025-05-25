@@ -42,8 +42,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
               id: true,
               title: true,
               lessons: { // Each chapter contains lessons
-                where: {
-                  // Optional conditions like published lessons
+                orderBy: {
+                  createdAt: 'asc',  // Сортировка по дате создания по возрастанию
                 },
                 select: {
                   id: true,
