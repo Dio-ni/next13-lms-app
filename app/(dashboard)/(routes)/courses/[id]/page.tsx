@@ -201,7 +201,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
                     {module.Quiz && (
                       <Link
-                        href={`/dashboard/courses/${course.id}/modules/${module.id}/quiz`}
+                        href={`/courses/${course.id}/modules/${module.id}/quiz`}
                         className="inline-block bg-primary text-white font-semibold py-2 px-4 rounded hover:bg-primary/90 transition"
                       >
                         📝 Тестті өту

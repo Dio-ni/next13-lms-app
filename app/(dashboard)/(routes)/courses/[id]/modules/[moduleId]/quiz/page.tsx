@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
+import { ArrowLeft } from 'lucide-react';
 
 interface QuizData {
   id: string;
@@ -24,7 +25,7 @@ interface QuizResultData {
 export default function QuizTakingPage({
   params,
 }: {
-  params: { courseId: string; moduleId: string };
+  params: { id: string; moduleId: string };
 }) {
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -134,7 +135,17 @@ export default function QuizTakingPage({
   if (!quiz) return <p>Quiz табылмады</p>;
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto p-4 pt-20">
+      <a   href={`/courses/${params.id}`}
+                      className=" my-4 flex items-center gap-x-2 text-sm hover:text-primary transition-colors">
+                  {/* <a className="flex items-center gap-x-2"> */}
+                    <ArrowLeft className="h-4 w-4" />
+                    <div className="flex items-center gap-x-2">
+                      {/* <Library className="h-4 w-4" /> */}
+                      <span>Курска қайта оралу</span>
+                    </div>
+                  {/* </a> */}
+                </a>
       <h1 className="text-2xl font-bold mb-4">{quiz.title}</h1>
 
       {quiz.questions.map((q, qIndex) => (
