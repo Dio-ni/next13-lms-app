@@ -187,11 +187,12 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
               </>
             )}
           </div>
-            
+            <Button size="sm" className='rounded-lg border'
+                  variant="ghost"  onClick={() => onEditQuiz(mod.id)}>Модульге тест қосу</Button>
+         
           {/* Әр модульге арналған ChapterForm осында орналастырылады */}
           <ChapterForm courseId={courseId} moduleId={mod.id} />
-          <button  onClick={() => onEditQuiz(mod.id)}>Куиз қосу</button>
-         
+          
         </div>
       ))}
     </div>
