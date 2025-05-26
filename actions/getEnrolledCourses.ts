@@ -4,9 +4,7 @@ import { db } from "@/lib/db";
 export async function getEnrolledCourses(userId?: string) {
   try {
     const enrollments = await db.enrollment.findMany({
-      where: {
-        userId: userId,
-      },
+      where: { userId },
       include: {
         course: {
           include: {
@@ -37,30 +35,30 @@ export async function getEnrolledCourses(userId?: string) {
       },
     });
 
-    if (enrollments.length === 0) {
-      return [];
-    }
+    if (!enrollments.length) return [];
 
-    return enrollments.map((enrollment) => ({
-      course: {
-        id: enrollment.course.id,
-        title: enrollment.course.title,
-        description: enrollment.course.description,
-        imageUrl: enrollment.course.imageUrl,
-        isPublished: enrollment.course.isPublished,
-        category: enrollment.course.category?.name,
-        modules: enrollment.course.modules.map((module) => ({
-          id: module.id,
-          title: module.title,
-          chapters: module.chapters.map((chapter) => ({
-            id: chapter.id,
-            title: chapter.title,
-            lessons: chapter.lessons,
-          })),
-        })),
-        attachments: enrollment.course.attachments,
-      },
-    }));
+    return enrollments
+      .filter((enrollment) => enrollment.course) // убираем null курсы
+      .map(({ course }) => ({
+        course: {
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          imageUrl: course.imageUrl,
+          isPublished: course.isPublished,
+          category: course.category?.name,
+          modules: course.modules?.map((module) => ({
+            id: module.id,
+            title: module.title,
+            chapters: module.chapters?.map((chapter) => ({
+              id: chapter.id,
+              title: chapter.title,
+              lessons: chapter.lessons || [],
+            })) || [],
+          })) || [],
+          attachments: course.attachments || [],
+        },
+      }));
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     throw new Error("Failed to fetch enrolled courses.");

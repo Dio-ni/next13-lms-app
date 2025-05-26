@@ -36,6 +36,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
         select: {
           id: true,
           title: true,
+          Quiz: true,
           chapters: { // Each module contains chapters
             
             select: {
@@ -162,7 +163,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                     <h3 className="text-xl font-semibold mb-4 text-primary">
                       📘 Модуль {index + 1}: {module.title}
                     </h3>
-
+                    
                     {module.chapters?.map((chapter, chapterIndex) => (
                       <div key={chapter.id} className="pl-4 border-l-4 border-primary/30 mb-6">
                         <h4 className="text-lg font-semibold mb-3">
@@ -191,8 +192,23 @@ export default async function CoursePage({ params }: CoursePageProps) {
                             </div>
                           ))}
                         </div>
+                        <div className="mt-4 flex justify-end">
+                       
+
+                      </div>
                       </div>
                     ))}
+
+                    {module.Quiz && (
+                      <Link
+                        href={`/dashboard/courses/${course.id}/modules/${module.id}/quiz`}
+                        className="inline-block bg-primary text-white font-semibold py-2 px-4 rounded hover:bg-primary/90 transition"
+                      >
+                        📝 Тестті өту
+                      </Link>
+                    )}
+
+
                   </div>
                 ))}
               </div>
