@@ -7,12 +7,16 @@ import { InstructorsSection } from "@/components/landing/InstructorsSection";
 import { ComparisonSection } from "@/components/landing/ComparisonSection";
 import { CourseStructureSection } from "@/components/landing/CourseStructureSection";
 import { Footer } from "@/components/landing/Footer"; // New import
+import { CourseAboutSection } from "@/components/landing/ui/CourseAboutSection";
+import MassOpenOnlineCourses from "@/components/landing/ui/MassOpenOnlineCourses";
 
 const Index = () => {
   return (
     <div className="min-h-screen ">
       <HeroSection />
       <FeaturesSection />
+      <MassOpenOnlineCourses/>
+      <CourseAboutSection /> 
       <CourseStructureSection />
       <UserRolesSection />
       <CourseSection />
