@@ -3,7 +3,7 @@ import { CourseCard } from "@/components/CourseCard";
 import { getAllCourses } from "@/actions/get-all-courses";
 
 export const dynamic = "force-static";
-export const revalidate = 3600; // revalidate at most every hour
+export const revalidate = 60; // revalidate at most every hour
 
 export default async function Home() {
   const courses = await getAllCourses();
