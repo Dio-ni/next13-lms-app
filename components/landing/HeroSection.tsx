@@ -14,13 +14,13 @@ export const HeroSection = () => {
             Заманауи онлайн курстар арқылы өзіңіздің кәсіби дағдыларыңызды дамытыңыз
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-primary text-white">
+            {/* <Button size="lg" className="bg-primary text-white">
               <GraduationCap className="mr-2 h-5 w-5" />
               Тіркелу
             </Button>
             <Button size="lg" variant="outline">
               Толығырақ
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

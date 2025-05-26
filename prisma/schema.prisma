@@ -4,10 +4,15 @@ generator Client {
 }
 
 datasource db {
+<<<<<<< HEAD
   provider = "mysql"  
   // provider = "postgresql"
+=======
+
+  provider = "postgresql"  
+
+>>>>>>> 9e7506ed427647e9a9d3ffceb9c8b016b71fdb0e
   url          = env("DATABASE_DATABASE_URL")
-  relationMode = "prisma"
 }
 
 model Category {
@@ -50,6 +55,10 @@ model Module {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+
+  Quiz Quiz[]
+
+  QuizResult QuizResult[]
 }
 
 model Chapter {
@@ -64,7 +73,6 @@ model Chapter {
   module     Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   lessons    Lesson[]
-  quizzes    Quiz[]
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt()
@@ -86,16 +94,16 @@ model Lesson {
 }
 
 model Quiz {
-  id       String  @id @default(uuid())
-  title    String
-  chapterId String
-
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  questions Question[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  id         String   @id @default(uuid())
+  title      String
+  moduleId  String?  // optional
+  module    Module? @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  questions  Question[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
 }
+
+
 
 model Question {
   id       String  @id @default(uuid())
@@ -158,4 +166,20 @@ model Attachment {
   updatedAt DateTime @updatedAt()
 
   course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+
+model QuizResult {
+  id         String      @id @default(cuid())
+  userId     String
+  module     Module      @relation(fields: [moduleId], references: [id])
+  moduleId   String
+
+  score      Int
+  answers    Json        // сюда сохраняем массив выбранных вариантов (например [0,2,1,...])
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([userId, moduleId])  // запрещаем дублирование результатов для одного пользователя по одному модулю
 }

@@ -5,6 +5,7 @@ import {
   File,
   LayoutDashboard,
   ListChecks,
+  PlusCircle,
 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
@@ -21,7 +22,8 @@ import { AttachmentForm } from './components/attachment-form';
 import { Banner } from '@/components/banner';
 import { Actions } from './components/actions';
 import { ModulesForm } from './components/modules-form';
-// import { QuizForm } from './components/quiz-form';
+import { QuizForm } from '../../../../../../components/quiz-form';
+import { Button } from "@/components/ui/button";
 
 interface CourseIdPageProps {
   params: {
@@ -143,6 +145,8 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
                   initialValue={course.certificateEnabled}
                 />
               </div>
+              
+
               {/* <QuizForm 
                 courseId={params.courseId} 
                 initialData={{
