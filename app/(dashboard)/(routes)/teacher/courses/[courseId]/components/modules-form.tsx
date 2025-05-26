@@ -2,7 +2,7 @@
 
 import { Module, Course } from '@prisma/client';
 import axios from 'axios';
-import { Loader2, PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { Loader2, PlusCircle, Pencil, Trash2, Link } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -94,6 +94,11 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
     setTitleInputs(initTitles);
   }, [initialData.modules]);
 
+
+  const onEditQuiz = (moduleId: string) => {
+    router.push(`/teacher/courses/${courseId}/modules/${moduleId}/quiz`);
+  };
+
   return (
     <div className="p-4 mt-6 border rounded-md bg-slate-100">
       <div className="flex items-center justify-between mb-4">
@@ -182,9 +187,11 @@ const ModulesForm: FC<ModulesFormProps> = ({ initialData, courseId }) => {
               </>
             )}
           </div>
-
+            
           {/* Әр модульге арналған ChapterForm осында орналастырылады */}
           <ChapterForm courseId={courseId} moduleId={mod.id} />
+          <button  onClick={() => onEditQuiz(mod.id)}>Куиз қосу</button>
+         
         </div>
       ))}
     </div>
