@@ -93,13 +93,13 @@ const router = useRouter();
         )?.id;
   
         // Open the corresponding module if it's not already open
-        setOpenModules((prev) => {
-          // Only open the current module if it is not already open
-          if (currentModuleId && !prev.includes(currentModuleId)) {
-            return [...prev, currentModuleId];
-          }
-          return prev;
-        });
+        // setOpenModules((prev) => {
+        //   // Only open the current module if it is not already open
+        //   if (currentModuleId && !prev.includes(currentModuleId)) {
+        //     return [...prev, currentModuleId];
+        //   }
+        //   return prev;
+        // });
       } else {
         // If there is no current lesson, close all modules
         setOpenModules([]);

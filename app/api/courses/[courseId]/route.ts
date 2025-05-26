@@ -35,18 +35,18 @@ export async function PATCH(
     return new NextResponse('Internal Error', { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
   { params }: { params: { courseId: string } }
 ) {
   try {
-    const authResponse = await auth();  // Await the response from auth()
-    const userId = authResponse.userId;
-
+    const { userId } = auth();
     if (!userId) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
+    // Check if the course exists
     const course = await db.course.findUnique({
       where: {
         id: params.courseId,
@@ -58,6 +58,23 @@ export async function DELETE(
       return new NextResponse('Course not found', { status: 404 });
     }
 
+    // First delete quiz results
+    await db.quizResult.deleteMany({
+      where: {
+        module: {
+          courseId: params.courseId,
+        },
+      },
+    });
+
+    // Then delete modules
+    await db.module.deleteMany({
+      where: {
+        courseId: params.courseId,
+      },
+    });
+
+    // Finally delete the course
     await db.course.delete({
       where: {
         id: params.courseId,
