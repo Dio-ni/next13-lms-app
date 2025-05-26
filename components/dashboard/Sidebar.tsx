@@ -31,6 +31,8 @@ import {
 import { CourseProgress } from "@/components/CourseProgress";
 import { calculateCourseProgress } from "@/actions/calculateCourseProgress";
 import { Category, Chapter, Course, Lesson } from "@prisma/client";
+import { useRouter } from "next/navigation";
+
 
 type CourseWithDetails = {
   id: string;
@@ -65,6 +67,7 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
   const [openModules, setOpenModules] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
 
+const router = useRouter();
   // Sync the opened modules with the pathname
   useEffect(() => {
     if (pathname && course?.modules) {
@@ -119,16 +122,18 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
     <div className="h-full flex flex-col">
       <div className="p-4 lg:p-6 border-b flex flex-col gap-y-4">
         <div className="flex items-center justify-between">
-          <Link
-            href={`/courses/${course.id}`}
-            className="flex items-center gap-x-2 text-sm hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <div className="flex items-center gap-x-2">
-              <Library className="h-4 w-4" />
-              <span>Курска қайта оралу</span>
-            </div>
-          </Link>
+          
+          <a   href={`/courses/${course.id}`}
+                className="flex items-center gap-x-2 text-sm hover:text-primary transition-colors">
+            {/* <a className="flex items-center gap-x-2"> */}
+              <ArrowLeft className="h-4 w-4" />
+              <div className="flex items-center gap-x-2">
+                <Library className="h-4 w-4" />
+                <span>Курска қайта оралу</span>
+              </div>
+            {/* </a> */}
+          </a>
+
           <div className="space-x-2">
             <Button
               onClick={close}

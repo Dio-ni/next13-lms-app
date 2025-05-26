@@ -12,20 +12,14 @@ export const InstructorsSection = () => {
       expertise: "Онлайн оқыту әдістемесі",
       description: "10 жылдық тәжірибесі бар, 50+ онлайн курс авторы"
     },
-    {
-      name: "Адылбекова Эльвира Тулепбергеновна",
-      title: "п.ғ.к., доцент м.а",
-      img:Author2,
-      expertise: "Педагогикалық технологиялар",
-      description: "Халықаралық конференциялардың спикері, 15+ жыл тәжірибе"
-    }
+    
   ];
 
   return (
     <section id="instructors" className="py-20">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">АВТОРЛАР ТУРАЛЫ МӘЛІМЕТ</h2>
-        <div className="grid md:grid-cols-2 gap-8">
+        <h2 className="text-3xl font-bold text-center mb-12">АВТОР ТУРАЛЫ МӘЛІМЕТ</h2>
+        <div className="flex justify-center ">
           {instructors.map((instructor, index) => (
             <Card key={index} className="border hover:shadow-lg transition-shadow">
               <CardHeader>

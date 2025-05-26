@@ -104,6 +104,7 @@ useEffect(() => {
       <NavLink href="/my-courses" label="Менің курстарым" />
       
       <NavLink href="/instruction" label="Нұсқаулық " />
+      <NavLink href="/about-course" label="ЖАОК " />
     </nav>
   );
 
@@ -112,6 +113,7 @@ useEffect(() => {
       <NavLink href="/" label="Басты бет" />
       <NavLink href="/teacher/courses" label="Менің курстарым" />
       <NavLink href="/instruction" label="Нұсқаулық " />
+      <NavLink href="/about-course" label="ЖАОК " />
     </nav>
   );
 
