@@ -69,7 +69,8 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": fileRes.headers.get("Content-Type") || "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${attachment.name}"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(attachment.name)}`,
+       
         "Content-Length": buffer.length.toString(),
       },
     });
