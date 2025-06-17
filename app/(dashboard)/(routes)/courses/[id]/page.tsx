@@ -63,6 +63,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     },
   });
 
+  const firstLessonId = course?.modules?.[0]?.chapters?.[0].lessons?.[0].id || ""
   // Check if course exists
   if (!course) {
     return (
@@ -126,7 +127,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 md:min-w-[300px]">
-              <EnrollButton courseId={course.id} isEnrolled={isEnrolled} />
+              <EnrollButton courseId={course.id}  firstLessonId={firstLessonId} isEnrolled={isEnrolled} />
             </div>
           </div>
 

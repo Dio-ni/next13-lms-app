@@ -46,7 +46,7 @@ export async function DELETE(
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    // Check if the course exists
+    // Check if the course exists 
     const course = await db.course.findUnique({
       where: {
         id: params.courseId,
