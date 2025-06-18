@@ -131,7 +131,6 @@ export default function QuizTakingPage({
     }
   };
 
-  if (loading) return <p>Тест жүктелуде...</p>;
   if (!quiz) return <p>Quiz табылмады</p>;
 
   return (
