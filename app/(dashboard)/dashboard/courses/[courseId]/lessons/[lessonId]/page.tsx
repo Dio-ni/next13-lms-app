@@ -77,7 +77,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
             {/* Only show the LessonCompleteButton if the user is authenticated */}
             {userId && (
-              <div className="flex justify-end">
+              <div className="relative w-full">
                 <LessonCompleteButton lessonId={lesson.id} courseId={courseId} />
               </div>
             )}

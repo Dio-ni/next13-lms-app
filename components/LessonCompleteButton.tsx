@@ -66,7 +66,7 @@ export function LessonCompleteButton({
   const isLoading = isCompleted === null || isPendingTransition;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t z-50">
+    <div className="fixed w-[1/2]  right-[25%] md:right-[15%] bottom-3 p-4   backdrop-blur-md border-xs border z-50">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
         <div className="flex-1">
           <p className="text-sm font-medium">
@@ -105,12 +105,12 @@ export function LessonCompleteButton({
           ) : isCompleted ? (
             <>
               <XCircle className="h-4 w-4 mr-2" />
-              Аяқталмаған деп белгіле
+              Аяқталмаған деп белгілеу
             </>
           ) : (
             <>
               <CheckCircle className="h-4 w-4 mr-2" />
-              Аяқталды деп белгіле
+              Аяқталды деп белгілеу
             </>
           )}
         </Button>

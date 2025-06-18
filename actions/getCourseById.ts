@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { Category, Course, Lesson } from '@prisma/client';
+import { Category, Course, Lesson, Quiz } from '@prisma/client';
 
 type CourseWithDetails = {
   id: string;
@@ -15,10 +15,16 @@ type CourseWithDetails = {
       title: string;
       lessons: Lesson[];
     }[];
+    quiz?: {
+      id: string;
+      title: string;
+    } | null;
   }[];
 };
 
-export const getCourseById = async (courseId: string): Promise<CourseWithDetails | null> => {
+export const getCourseById = async (
+  courseId: string
+): Promise<CourseWithDetails | null> => {
   try {
     const course = await db.course.findUnique({
       where: {
@@ -29,20 +35,33 @@ export const getCourseById = async (courseId: string): Promise<CourseWithDetails
         modules: {
           include: {
             chapters: {
+              orderBy: {
+                position: 'asc',
+              },
               include: {
                 lessons: {
+                  orderBy: {
+                    createdAt: 'asc', // 👈 order lessons by creation time (oldest to newest)
+                  },
                   select: {
                     id: true,
                     title: true,
                     content: true,
                     videoUrl: true,
-                    imageUrl: true, 
+                    imageUrl: true,
                     chapterId: true,
                     createdAt: true,
                     updatedAt: true,
                   },
                 },
               },
+            },
+            Quiz: {
+              select: {
+                id: true,
+                title: true,
+              },
+              take: 1, // if one quiz per module
             },
           },
         },
@@ -67,6 +86,7 @@ export const getCourseById = async (courseId: string): Promise<CourseWithDetails
           title: chapter.title,
           lessons: chapter.lessons,
         })),
+        quiz: module.Quiz[0] || null, // take the first quiz if exists
       })),
     };
 

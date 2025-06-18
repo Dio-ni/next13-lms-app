@@ -2,20 +2,28 @@ import { db } from '@/lib/db';
 import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request) {
+// GET /api/quizzes/results/[quizId]
+export async function GET(
+  _req: Request,
+  { params }: { params: { quizId: string } }
+) {
   try {
     const { userId } = auth();
     if (!userId) return new NextResponse('Unauthorized', { status: 401 });
 
-    const url = new URL(req.url);
-    const moduleId = url.searchParams.get('moduleId');
-    if (!moduleId) return new NextResponse('moduleId is required', { status: 400 });
+    const quiz = await db.quiz.findUnique({
+      where: { id: params.quizId },
+      select: { moduleId: true },
+    });
 
+    if (!quiz || !quiz.moduleId) {
+      return new NextResponse('Quiz not found or missing moduleId', { status: 404 });
+    }
     const result = await db.quizResult.findUnique({
       where: {
         userId_moduleId: {
           userId,
-          moduleId,
+          moduleId: quiz.moduleId,
         },
       },
     });
@@ -29,22 +37,33 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+// POST /api/quizzes/results/[quizId]
+export async function POST(
+  req: Request,
+  { params }: { params: { quizId: string } }
+) {
   try {
     const { userId } = auth();
     if (!userId) return new NextResponse('Unauthorized', { status: 401 });
 
-    const { moduleId, score, answers } = await req.json();
+    const { score, answers } = await req.json();
 
-    if (!moduleId || typeof score !== 'number' || !Array.isArray(answers)) {
+    if (typeof score !== 'number' || !Array.isArray(answers)) {
       return new NextResponse('Invalid input', { status: 400 });
     }
 
+    const quiz = await db.quiz.findUnique({
+      where: { id: params.quizId },
+      select: { moduleId: true },
+    });
+    if (!quiz || !quiz.moduleId) {
+      return new NextResponse('Quiz not found or missing moduleId', { status: 404 });
+    }
     const result = await db.quizResult.upsert({
       where: {
         userId_moduleId: {
           userId,
-          moduleId,
+          moduleId: quiz.moduleId,
         },
       },
       update: {
@@ -54,7 +73,7 @@ export async function POST(req: Request) {
       },
       create: {
         userId,
-        moduleId,
+        moduleId: quiz.moduleId,
         score,
         answers,
       },

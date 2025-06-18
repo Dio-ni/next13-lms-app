@@ -8,6 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 interface QuizData {
   id: string;
   title: string;
+  moduleId: string;
   questions: {
     text: string;
     options: {
@@ -25,7 +26,7 @@ interface QuizResultData {
 export default function QuizTakingPage({
   params,
 }: {
-  params: { id: string; moduleId: string };
+  params: { courseId: string; quizId: string };
 }) {
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -38,8 +39,8 @@ export default function QuizTakingPage({
     const fetchQuizAndResult = async () => {
       setLoading(true);
       try {
-        // Получаем тест
-        const quizRes = await fetch(`/api/quizzes?moduleId=${params.moduleId}`);
+        // Fetch quiz by quiz ID
+        const quizRes = await fetch(`/api/quizzes/${params.quizId}`);
         if (!quizRes.ok) {
           toast.error('Quiz жүктелмеді');
           setLoading(false);
@@ -54,8 +55,10 @@ export default function QuizTakingPage({
 
         setQuiz(quizData);
 
-        // Получаем результат пользователя, если есть
-        const resultRes = await fetch(`/api/quizzes/results?moduleId=${params.moduleId}`);
+        // Fetch result by moduleId
+        // const resultRes = await fetch(`/api/quizzes/results?moduleId=${quizData.moduleId}`);
+        const resultRes = await fetch(`/api/quizzes/${params.quizId}/results`);
+
         if (resultRes.ok) {
           const resultData: QuizResultData = await resultRes.json();
           if (resultData && resultData.answers.length === quizData.questions.length) {
@@ -67,7 +70,6 @@ export default function QuizTakingPage({
             setAnswers(new Array(quizData.questions.length).fill(-1));
           }
         } else {
-          // Результат не найден, значит можно проходить
           setAnswers(new Array(quizData.questions.length).fill(-1));
         }
       } catch (error) {
@@ -79,10 +81,10 @@ export default function QuizTakingPage({
     };
 
     fetchQuizAndResult();
-  }, [params.moduleId]);
+  }, [params.courseId]);
 
   const handleSelect = (qIndex: number, oIndex: number) => {
-    if (submitted) return; // Блокируем выбор после сдачи
+    if (submitted) return;
     setAnswers((prev) => {
       const updated = [...prev];
       updated[qIndex] = oIndex;
@@ -106,17 +108,16 @@ export default function QuizTakingPage({
     setScore(newScore);
     setSubmitted(true);
 
-    // Сохраняем результат на сервер
     try {
-      const res = await fetch(`/api/quizzes/results`, {
+      const res = await fetch(`/api/quizzes/${quiz?.id}/results`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          moduleId: params.moduleId,
           answers,
           score: newScore,
         }),
       });
+
 
       if (!res.ok) {
         toast.error('Нәтижені сақтау кезінде қате болды');
@@ -131,21 +132,18 @@ export default function QuizTakingPage({
   };
 
   if (loading) return <p>Тест жүктелуде...</p>;
-
   if (!quiz) return <p>Quiz табылмады</p>;
 
   return (
-    <div className="max-w-2xl mx-auto p-4 pt-20">
-      <a   href={`/courses/${params.id}`}
-                      className=" my-4 flex items-center gap-x-2 text-sm hover:text-primary transition-colors">
-                  {/* <a className="flex items-center gap-x-2"> */}
-                    <ArrowLeft className="h-4 w-4" />
-                    <div className="flex items-center gap-x-2">
-                      {/* <Library className="h-4 w-4" /> */}
-                      <span>Курска қайта оралу</span>
-                    </div>
-                  {/* </a> */}
-                </a>
+    <div className="max-w-2xl mx-auto pb-12 ">
+      {/* <a
+        href={`/courses/${params.courseId}`}
+        className="my-4 flex items-center gap-x-2 text-sm hover:text-primary transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span>Курска қайта оралу</span>
+      </a> */}
+
       <h1 className="text-2xl font-bold mb-4">{quiz.title}</h1>
 
       {quiz.questions.map((q, qIndex) => (
@@ -179,7 +177,9 @@ export default function QuizTakingPage({
                     className="accent-green-500"
                     disabled={submitted}
                   />
-                  <label htmlFor={`question-${qIndex}`} className={optionStyle}>{o.text}</label>
+                  <label htmlFor={`question-${qIndex}`} className={optionStyle}>
+                    {o.text}
+                  </label>
                 </div>
               );
             })}
@@ -192,7 +192,9 @@ export default function QuizTakingPage({
           <p className="text-lg font-semibold">
             Сіздің нәтижеңіз: {score} / {quiz.questions.length}
           </p>
-          {alreadySubmitted && <p className="text-sm text-gray-500 mt-2">Сіз бұл тестті бұрын тапсырдыңыз.</p>}
+          {alreadySubmitted && (
+            <p className="text-sm text-gray-500 mt-2">Сіз бұл тестті бұрын тапсырдыңыз.</p>
+          )}
         </div>
       ) : (
         <Button onClick={handleSubmit}>Завершить тест</Button>

@@ -46,15 +46,17 @@ type CourseWithDetails = {
     chapters: {
       id: string;
       title: string;
-      lessons: Lesson[]; // Direct lessons array inside chapters
+      lessons: Lesson[];
     }[];
+    quiz?: {
+      id: string;
+      title: string;
+    } | null;
   }[];
+
 };
 
 
-type ChapterWithLessons = {
-  // Each chapter has an array of lessons
-};
 
 interface SidebarProps {
   course: CourseWithDetails;
@@ -68,48 +70,57 @@ export function Sidebar({ course, completedLessons = [] }: SidebarProps) {
   const [progress, setProgress] = useState(0);
 
 const router = useRouter();
+let currentModuleId: string | undefined;
+
   // Sync the opened modules with the pathname
   useEffect(() => {
-    if (pathname && course?.modules) {
-      // Find the current lesson based on the pathname
-      const currentLessonId = course.modules
-        .flatMap((module) => module.chapters)
-        .flatMap((chapter) => chapter.lessons)
-        .find((lesson) =>
-          pathname.includes(`/dashboard/courses/${course.id}/lessons/${lesson.id}`)
-        )?.id;
-  
-      if (currentLessonId) {
-        // Find the chapter that contains the current lesson
-        const currentChapterId = course.modules
-          .flatMap((module) => module.chapters)
-          .find((chapter) =>
-            chapter.lessons.some((lesson) => lesson.id === currentLessonId)
-          )?.id;
-  
-        // Find the module that contains the current chapter
-        const currentModuleId = course.modules.find((module) =>
-          module.chapters.some((chapter) => chapter.id === currentChapterId)
-        )?.id;
-  
-        // Open the corresponding module if it's not already open
-        // setOpenModules((prev) => {
-        //   // Only open the current module if it is not already open
-        //   if (currentModuleId && !prev.includes(currentModuleId)) {
-        //     return [...prev, currentModuleId];
-        //   }
-        //   return prev;
-        // });
-      } else {
-        // If there is no current lesson, close all modules
-        setOpenModules([]);
-      }
+  if (pathname && course?.modules) {
+    let foundModuleId: string | undefined;
+
+    // Check for current lesson
+    const currentLesson = course.modules
+      .flatMap((module) =>
+        module.chapters.flatMap((chapter) =>
+          chapter.lessons.map((lesson) => ({
+            moduleId: module.id,
+            lessonId: lesson.id,
+          }))
+        )
+      )
+      .find((item) =>
+        pathname.includes(`/dashboard/courses/${course.id}/lessons/${item.lessonId}`)
+      );
+
+    if (currentLesson) {
+      foundModuleId = currentLesson.moduleId;
     }
-  
-    // Recalculate the course progress
-    setProgress(calculateCourseProgress(course.modules, completedLessons)); 
-  }, [pathname, course, openModules, completedLessons]);
-  
+
+    // Check for current quiz
+    const currentQuiz = course.modules
+      .map((module) => ({
+        moduleId: module.id,
+        quizId: module.quiz?.id,
+      }))
+      .find(
+        (item) =>
+          item.quizId &&
+          pathname.includes(`/dashboard/courses/${course.id}/quiz/${item.quizId}`)
+      );
+
+    if (currentQuiz) {
+      foundModuleId = currentQuiz.moduleId;
+    }
+
+    // Open the current module if it's not already open
+    if (foundModuleId && !openModules.includes(foundModuleId)) {
+      setOpenModules((prev) => [...prev, foundModuleId!]);
+    }
+  }
+
+  // Recalculate course progress
+  setProgress(calculateCourseProgress(course.modules, completedLessons));
+}, [pathname, course, completedLessons]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -171,16 +182,17 @@ const router = useRouter();
                 "bg-background"
               )}
             >
-              <AccordionTrigger className="px-2 py-2 hover:no-underline transition-colors">
-                <div className="flex items-center gap-x-2 lg:gap-x-4 w-full">
-                  <span className="text-sm font-medium text-muted-foreground min-w-[28px]">
-                    {String(moduleIndex + 1).padStart(2, "0")}
-                  </span>
-                  <div className="flex flex-col gap-y-1 text-left flex-1 min-w-0">
-                    <p className="">{module.title}</p>
-                  </div>
+             <AccordionTrigger className="px-3 py-3 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-900 font-medium transition-colors">
+              <div className="flex items-center gap-x-2 lg:gap-x-4 w-full">
+                <span className="text-sm font-semibold min-w-[28px]">
+                  {String(moduleIndex + 1).padStart(2, "0")}
+                </span>
+                <div className="flex flex-col gap-y-1 text-left flex-1 min-w-0">
+                  <p className="truncate">{module.title}</p>
                 </div>
-              </AccordionTrigger>
+              </div>
+            </AccordionTrigger>
+
               <AccordionContent className="pt-2">
                 <div className="flex flex-col space-y-4">
                   {module.chapters.map((chapter, chapterIndex) => (
@@ -248,7 +260,21 @@ const router = useRouter();
                       </div>
                     </div>
                   ))}
-                </div>
+                  {module.quiz && (
+                    
+                    <Link
+                      prefetch={false}
+                      href={`/dashboard/courses/${course.id}/quiz/${module.quiz.id}`}
+                      onClick={close}
+                      className="flex items-center pl-8 lg:pl-10 pr-2 lg:pr-4 py-2 gap-x-2 lg:gap-x-4 group hover:bg-muted/50 transition-colors relative"
+                    >
+                      <ChevronRight className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-semibold text-blue-500">
+                        Модуль квизі: {module.quiz.title}
+                      </span>
+                    </Link>
+                  )}
+                  </div>
               </AccordionContent>
             </AccordionItem>
           ))}
