@@ -18,34 +18,53 @@ export interface QuizFormData {
 }
 
 interface QuizFormProps {
-  moduleId: string;
+  moduleId?: string;
+  courseId?: string;
   initialData?: QuizFormData;
   onSubmit?: (data: QuizFormData) => void;
 }
 
 export const QuizForm: React.FC<QuizFormProps> = ({
   moduleId,
+  courseId,
   initialData,
 }) => {
   const [title, setTitle] = useState(initialData?.title || '');
   const [questions, setQuestions] = useState<QuizFormData['questions']>(
     initialData?.questions || []
   );
-  const [isLoading, setIsLoading] = useState(false);
 
- 
+const [isLoading, setIsLoading] = useState(true);
+
 useEffect(() => {
   const fetchQuiz = async () => {
     try {
-      const res = await fetch(`/api/quizzes?moduleId=${moduleId}`);
-      const data = await res.json();
+      setIsLoading(true);
 
+      let url = '';
+      if (moduleId) {
+        url = `/api/quizzes?moduleId=${moduleId}`;
+      } else if (courseId) {
+        url = `/api/quizzes?courseId=${courseId}`;
+      } else {
+        setIsLoading(false);
+        return;
+      }
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error('Error fetching quiz');
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await res.json();
       if (data) {
-        setTitle(data.title);
+        setTitle(data.title || '');
         setQuestions(
-          data.questions.map((q: any) => ({
+          (data.questions || []).map((q: any) => ({
             text: q.text,
-            options: q.options.map((o: any) => ({
+            options: (q.options || []).map((o: any) => ({
               text: o.text,
               isCorrect: o.isCorrect,
             })),
@@ -54,11 +73,14 @@ useEffect(() => {
       }
     } catch (error) {
       console.error('Error loading quiz:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   fetchQuiz();
-}, [moduleId]);
+}, [moduleId, courseId]);
+
 
   const handleAddQuestion = () => {
     setQuestions((prev) => [
@@ -164,11 +186,23 @@ useEffect(() => {
     }
 
     try {
-      const res = await fetch('/api/quizzes', {
+      // Decide endpoint and payload based on type
+      let endpoint = '/api/quizzes';
+      let payload: any = { title, questions };
+
+      if (courseId && !moduleId) {
+        endpoint = '/api/courses/quizzes';
+        payload.courseId = courseId;
+      } else if (moduleId) {
+        payload.moduleId = moduleId;
+      }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ moduleId, title, questions }),
+        body: JSON.stringify(payload),
       });
+
 
       if (!res.ok) {
         
@@ -180,6 +214,46 @@ useEffect(() => {
       console.error('Қате:', error);
     }
   };
+const handleDelete = async () => {
+  if (!moduleId && !courseId) {
+    toast.error("Қай тестті жою керегін анықтай алмадық");
+    return;
+  }
+
+  if (!confirm("Тестті расымен жойғыңыз келе ме?")) {
+    return;
+  }
+
+  try {
+    let url = '/api/quizzes';
+    let query = '';
+
+    if (moduleId) {
+      query = `?moduleId=${moduleId}`;
+    } else if (courseId) {
+      query = `?courseId=${courseId}`;
+    }
+
+    const res = await fetch(`${url}${query}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      toast.error("Тестті жою сәтсіз аяқталды");
+      return;
+    }
+
+    toast.success("Тест жойылды");
+
+    // optionally clear local state
+    setTitle('');
+    setQuestions([]);
+
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    toast.error("Қате орын алды");
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 my-10">
@@ -287,6 +361,16 @@ useEffect(() => {
             <Button type="submit" className="ml-auto">
               Сақтау
             </Button>
+            {(moduleId || courseId) && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+              >
+                Тестті жою
+              </Button>
+            )}
+
           </div>
         </>
       )}

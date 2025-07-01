@@ -31,12 +31,20 @@ model Course {
   modules   Module[]
   attachments Attachment[]
   enrollments Enrollment[]
+  finalQuizId String?  @unique
+  finalQuiz   Quiz?   @relation("CourseFinalQuiz", fields: [finalQuizId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
   chapter Chapter[]
   // quiz Quiz[]
+
+  Quiz Quiz[]
+
+  QuizResult QuizResult[]
+
+  CourseFeedback CourseFeedback[]
 }
 
 model Module {
@@ -91,12 +99,18 @@ model Lesson {
 model Quiz {
   id         String   @id @default(uuid())
   title      String
-  moduleId  String?  // optional
-  module    Module? @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId   String?  // still optional
+  module     Module?  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  courseId   String?   // new field
+  course     Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseFinalQuiz Course? @relation("CourseFinalQuiz")
+
   questions  Question[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt()
 }
+
 
 
 
@@ -163,18 +177,38 @@ model Attachment {
   course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
-
 model QuizResult {
   id         String      @id @default(cuid())
   userId     String
-  module     Module      @relation(fields: [moduleId], references: [id])
-  moduleId   String
+
+  moduleId   String?
+  module     Module?     @relation(fields: [moduleId], references: [id])
+
+  courseId   String?
+  course     Course?     @relation(fields: [courseId], references: [id])
 
   score      Int
-  answers    Json        // сюда сохраняем массив выбранных вариантов (например [0,2,1,...])
+  answers    Json
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
-  @@unique([userId, moduleId])  // запрещаем дублирование результатов для одного пользователя по одному модулю
+  @@unique([userId, moduleId, courseId])
+}
+model CourseFeedback {
+  id         String   @id @default(uuid())
+  courseId   String
+  userId     String
+  email      String
+  position   String?
+  timeSpent  String?
+  impression String?
+  difficulty String?
+  suggestions String?
+
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+// Один отзыв на курс от одного пользователя
 }

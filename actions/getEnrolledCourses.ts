@@ -4,7 +4,13 @@ import { db } from "@/lib/db";
 export async function getEnrolledCourses(userId?: string) {
   try {
     const enrollments = await db.enrollment.findMany({
-      where: { userId },
+      where: {
+        userId,
+        course: {
+          isPublished: true,
+        },
+      },
+
       include: {
         course: {
           include: {

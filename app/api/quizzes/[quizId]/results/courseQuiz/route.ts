@@ -1,52 +1,56 @@
 import { db } from '@/lib/db';
 import { auth } from '@clerk/nextjs';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// GET /api/quizzes/results/[quizId]
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: { quizId: string } }
 ) {
   try {
     const { userId } = auth();
-    if (!userId) return new NextResponse('Unauthorized', { status: 401 });
+    if (!userId) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
 
+    // get the quiz to find its courseId
     const quiz = await db.quiz.findUnique({
       where: { id: params.quizId },
-      select: { moduleId: true },
+      select: { courseId: true },
     });
 
-    if (!quiz || !quiz.moduleId) {
-      return new NextResponse('Quiz not found or missing moduleId', { status: 404 });
+    if (!quiz || !quiz.courseId) {
+      return new NextResponse('Quiz not found or missing courseId', { status: 404 });
     }
-    const result = await db.quizResult.findUnique({
+
+    const result = await db.quizResult.findFirst({
       where: {
-        userId_moduleId: {
-          userId,
-          moduleId: quiz.moduleId,
-        },
+        userId,
+        courseId: quiz.courseId,
       },
     });
 
-    if (!result) return new NextResponse(null, { status: 404 });
+    if (!result) {
+      return new NextResponse(null, { status: 404 });
+    }
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error(`[QUIZRESULTS_GET]: ${error}`);
+    console.error('[COURSEQUIZRESULT_GET]', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
-// POST /api/quizzes/results/[quizId]
 export async function POST(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { quizId: string } }
 ) {
   try {
     const { userId } = auth();
-    if (!userId) return new NextResponse('Unauthorized', { status: 401 });
+    if (!userId) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
 
-    const { score, answers } = await req.json();
+    const { answers, score, courseId  } = await req.json();
 
     if (typeof score !== 'number' || !Array.isArray(answers)) {
       return new NextResponse('Invalid input', { status: 400 });
@@ -54,34 +58,36 @@ export async function POST(
 
     const quiz = await db.quiz.findUnique({
       where: { id: params.quizId },
-      select: { moduleId: true },
+      select: { courseId: true },
     });
-    if (!quiz || !quiz.moduleId) {
-      return new NextResponse('Quiz not found or missing moduleId', { status: 404 });
+
+    if (!quiz || !quiz.courseId) {
+      return new NextResponse('Quiz not found or missing courseId', { status: 404 });
     }
+    
     const result = await db.quizResult.upsert({
       where: {
-        userId_moduleId: {
+        userId_moduleId_courseId: {
           userId,
-          moduleId: quiz.moduleId,
+          moduleId: '',
+          courseId: quiz.courseId,
         },
       },
       update: {
-        score,
         answers,
-        updatedAt: new Date(),
+        score,
       },
       create: {
         userId,
-        moduleId: quiz.moduleId,
-        score,
         answers,
+        courseId: quiz.courseId,
+        score,
       },
     });
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error(`[QUIZRESULTS_POST]: ${error}`);
+    console.error('[COURSEQUIZRESULT_POST]', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -1,6 +1,8 @@
+
 import { auth } from "@clerk/nextjs/server";
 import {
   ArrowLeft,
+  ArrowRight,
   CircleDollarSign,
   File,
   LayoutDashboard,
@@ -91,7 +93,8 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
   const completionText = `${completedFields}/${totalFields}`;
 
   const isComplete = requiredFields.every(Boolean);
-
+  
+ 
   return (
     <div className="mt-16">
       {!course.isPublished && (
@@ -106,6 +109,7 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Курстарға қайту
             </Link>
+            
             <h1 className="text-2xl font-medium">Курс параметрлерін орнату</h1>
             <span className="text-sm text-slate-700">
             Барлық өрістерді толтырыңыз {completionText}
@@ -140,11 +144,28 @@ const CourseIdPage = async ({ params }: CourseIdPageProps) => {
                 <h2 className="text-xl">Курс сертификаты</h2>
               </div>
               <div className="m-6">
+                <Link
+                  href={`/teacher/courses/${params.courseId}/quiz`}
+                  className="
+                    inline-flex items-center gap-2
+                    px-4 py-2
+                    border border-primary rounded-lg
+                    text-primary font-medium
+                    bg-white
+                    shadow-sm
+                    transition duration-200
+                    hover:bg-primary hover:text-white hover:shadow-md
+                  "
+                >
+                  Курсқа тест қосу
+                </Link>
+
                 <CertificateToggleForm 
                   courseId={params.courseId}
                   initialValue={course.certificateEnabled}
                 />
               </div>
+              
               
 
               {/* <QuizForm 

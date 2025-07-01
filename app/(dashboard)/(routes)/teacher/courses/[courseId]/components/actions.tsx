@@ -1,7 +1,7 @@
 'use client';
 
 import axios from 'axios';
-import { Trash } from 'lucide-react';
+import { ArrowRight, Trash } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useConfettiStore } from '@/hooks/use-confetti-store';
 import ConfirmModal from '@/components/modals/confirm-modal';
+import Link from 'next/dist/client/link';
 
 interface ActionsProps {
   disabled: boolean;
@@ -80,6 +81,13 @@ export const Actions = ({ disabled, courseId, isPublished }: ActionsProps) => {
           <Trash className="w-4 h-4" />
         </Button>
       </ConfirmModal>
+      <Link
+        href={`/teacher/courses/${courseId}/feadback`}
+        className="inline-flex items-center gap-2 rounded-full bg-primary text-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-primary/90 transition"
+      >
+        Сауалнамаларды көру
+      </Link>
+
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { CourseContent } from './component/course-content'
 import { db } from "@/lib/db"; // Assuming db instance for querying Prisma
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +11,8 @@ import { getCompletedLessons } from "@/actions/getCompletedLessons";
 import { calculateCourseProgress } from "@/actions/calculateCourseProgress";
 import { getCourseInstructor } from "@/actions/getCourseInstructor";
 import { CourseProgress } from "@/components/CourseProgress";
+import { useState } from "react";
+import { CourseFeedbackForm } from './component/CourseFeedbackForm';
 
 
 
@@ -32,6 +35,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     include: {
       category: true,
       attachments:true,
+      finalQuiz: true,
       modules: { // First level is modules
         select: {
           id: true,
@@ -85,7 +89,28 @@ export default async function CoursePage({ params }: CoursePageProps) {
     const completedLessons = await getCompletedLessons(course.id);
     progress = calculateCourseProgress(course.modules, completedLessons);
   }
-      
+   
+let finalExamScore = null;
+
+if (isEnrolled && user?.id && course.finalQuizId) {
+  // 1. Найти результат пользователя
+  const result = await db.quizResult.findFirst({
+    where: { userId: user.id, courseId: course.id }
+  });
+
+  // 2. Найти сам финальный тест, чтобы узнать количество вопросов
+  const finalQuiz = await db.quiz.findUnique({
+    where: { id: course.finalQuizId },
+    include: { questions: true },
+  });
+
+  if (result && finalQuiz && finalQuiz.questions.length > 0) {
+    finalExamScore = Math.round((result.score / finalQuiz.questions.length) * 100);
+  } else {
+    finalExamScore = null;
+  }
+}
+   
 
   const instructor = await getCourseInstructor(course.id);
 
@@ -150,71 +175,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
           
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <div className="bg-card rounded-2xl p-6 mb-8 border border-border shadow-sm">
-              <h2 className="text-3xl font-bold mb-6">Курстың мазмұны</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mb-8">
-                {course.description}
-              </p>
+          <CourseContent course={course} />
 
-              <div className="space-y-6">
-                {course.modules?.map((module, index) => (
-                  <div key={module.id} className="rounded-lg border border-border p-4 bg-muted/5">
-                    <h3 className="text-xl font-semibold mb-4 text-primary">
-                      📘 Модуль {index + 1}: {module.title}
-                    </h3>
-                    
-                    {module.chapters?.map((chapter, chapterIndex) => (
-                      <div key={chapter.id} className="pl-4 border-l-4 border-primary/30 mb-6">
-                        <h4 className="text-lg font-semibold mb-3">
-                          📗 Бөлім {chapterIndex + 1}: {chapter.title}
-                        </h4>
-
-                        <div className="space-y-3">
-                          {chapter.lessons?.map((lesson, lessonIndex) => (
-                            <div
-                              key={lesson.id}
-                              className="flex items-center gap-4 p-3 rounded-md hover:bg-muted transition"
-                            >
-                              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
-                                {lessonIndex + 1}
-                              </div>
-                              <div className="flex items-center gap-2 text-foreground">
-                                <BookOpen className="w-4 h-4 text-muted-foreground" />
-                                <Link
-                                  href={`/dashboard/courses/${course.id}/lessons/${lesson.id}`}
-                                  passHref
-                                  className="font-medium text-primary hover:underline"
-                                >
-                                  {lesson.title}
-                                </Link>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                       
-
-                      </div>
-                      </div>
-                    ))}
-
-                    {module.Quiz && (
-                      <Link
-                        href={`/courses/${course.id}/modules/${module.id}/quiz`}
-                        className="inline-block bg-primary text-white font-semibold py-2 px-4 rounded hover:bg-primary/90 transition"
-                      >
-                        📝 Тестті өту
-                      </Link>
-                    )}
-
-
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
 
           {/* Sidebar */}
@@ -237,41 +199,63 @@ export default async function CoursePage({ params }: CoursePageProps) {
             ) : (
               <p className="text-muted-foreground text-sm">Автор табылмады</p>
             )}
-            
+            {course.finalQuiz && (
+                <div className="rounded-lg border border-border p-4 bg-muted/5 mt-8">
+                  <h3 className="text-xl font-semibold mb-4 text-primary">
+                    🏁 Финалдық тест
+                  </h3>
+                  <Link
+                    href={`/courses/${course.id}/final-quiz/${course.finalQuizId}`}
+                    className="inline-block bg-primary text-white font-semibold py-2 px-4 rounded hover:bg-primary/90 transition"
+                  >
+                    📝 Финалдық тестті өту
+                  </Link>
+                </div>
+              )}
+
             {/* Certificate download (only if user is enrolled & has ≥ 80% progress) */}
             {/* Certificate Section */}
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4">Сертификат</h2>
 
               {!isEnrolled ? (
-                <p className="text-sm text-muted-foreground">
-                  Сертификат алу үшін алдымен курсқа тіркеліңіз және оны кемінде 80% аяқтаңыз.
-                </p>
-              ) : !course.certificateEnabled ? (
-                <p className="text-sm text-muted-foreground">
-                  Бұл курс үшін сертификат қолжетімді емес.
-                </p>
-              ) : progress === null ? (
-                <p className="text-sm text-muted-foreground">
-                  Прогресс анықталмады. Сертификат алу үшін кемінде 80% курсты аяқтауыңыз қажет.
-                </p>
-              ) : progress < 80  ? (
-                <p className="text-sm text-muted-foreground">
-                  Сертификат алу үшін курсты кемінде 80% аяқтаңыз. Сіздің прогрессіңіз: {progress}%.
-                </p>
-              ) : (
-                <form
-                  action={`/api/courses/${course.id}/certificate/generateCertificate`}
-                  method="POST"
-                >
-                  <button
-                    type="submit"
-                    className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+                  <p className="text-sm text-muted-foreground">
+                    Сертификат алу үшін алдымен курсқа тіркеліңіз және оны кемінде 80% аяқтаңыз.
+                  </p>
+                ) : !course.certificateEnabled ? (
+                  <p className="text-sm text-muted-foreground">
+                    Бұл курс үшін сертификат қолжетімді емес.
+                  </p>
+                ) : progress === null ? (
+                  <p className="text-sm text-muted-foreground">
+                    Прогресс анықталмады. Сертификат алу үшін кемінде 80% курсты аяқтауыңыз қажет және финалдық тесттен кемінде 80% жинаңыз.
+                  </p>
+                ) : progress < 80 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Сертификат алу үшін курсты кемінде 80% аяқтаңыз және финалдық тесттен кемінде 80% жинаңыз. Сіздің прогрессіңіз: {progress}%.
+                  </p>
+                ) : finalExamScore === null ? (
+                  <p className="text-sm text-muted-foreground">
+                    Финалдық тест нәтижесі табылмады. Сертификат алу үшін финалдық тестті тапсырыңыз.
+                  </p>
+                ) : finalExamScore < 80 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Сертификат алу үшін финалдық тесттен кемінде 80% жинаңыз. Сіздің нәтижеңіз: {finalExamScore}%.
+                  </p>
+                ) : (
+                  <form
+                    action={`/api/courses/${course.id}/certificate/generateCertificate`}
+                    method="POST"
                   >
-                    Сертификатты жүктеу
-                  </button>
-                </form>
-              )}
+                    <button
+                      type="submit"
+                      className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+                    >
+                      Сертификатты жүктеу
+                    </button>
+                  </form>
+                )}
+
             </div>
 
              
@@ -294,6 +278,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   
                 ))}
               </div>
+              <CourseFeedbackForm courseId={course.id} />
 
             </div>
           </div>

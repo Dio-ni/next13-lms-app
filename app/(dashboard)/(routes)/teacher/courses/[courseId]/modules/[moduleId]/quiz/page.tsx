@@ -7,10 +7,7 @@ import Link from 'next/link';
 
 const CreateCourseQuizPage = ({ params }: { params: { courseId: string, moduleId: string } }) => {
     // console.log(params.moduleId)
-  const handleQuizSubmit = (data: QuizFormData) => {
-    console.log("Quiz data:", data);
-    // Call API to create quiz
-  };
+  
 const backToCourseEdit = (courseId: string) => {
     router.push(`/teacher/courses/${courseId}`);
   };
@@ -27,7 +24,6 @@ const backToCourseEdit = (courseId: string) => {
       <h1 className="text-2xl font-bold mb-4">Модульға арналған тест құру</h1>
       <QuizForm
         moduleId={params.moduleId}
-        onSubmit={handleQuizSubmit}
       />
     </div>
   );

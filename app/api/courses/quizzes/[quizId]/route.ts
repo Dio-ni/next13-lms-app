@@ -1,12 +1,12 @@
-import { db } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { db } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { quizId: string } }
+  { params }: { params: { finalQuizId: string } }
 ) {
   try {
-    const quizId = params.quizId;
+    const quizId = params.finalQuizId;
 
     if (!quizId) {
       return NextResponse.json({ error: "Missing quiz ID" }, { status: 400 });
