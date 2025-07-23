@@ -20,7 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider localization={localization}>
+    <ClerkProvider localization={localization}
+    afterSignInUrl=''>
       <html lang="kk"> {/* Set the HTML language attribute to Kazakh */}
         <body className={inter.className}>
           <ConfettiProvider />

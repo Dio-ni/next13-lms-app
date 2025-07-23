@@ -252,7 +252,7 @@ const handleResetConfirm = () => {
         <div className="mt-6 space-y-4">
           
           <Button variant="secondary" onClick={handleResetConfirm}>
-            Курсды қайта өту
+            Курсты қайта өту
           </Button>
 
         </div>
