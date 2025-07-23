@@ -132,7 +132,7 @@ if (isEnrolled && user?.id && course.finalQuizId) {
         <div className="absolute inset-0 bg-gradient-to-t from-black to-black/60" />
         <div className="absolute inset-0 container mx-auto px-4 flex flex-col justify-end pb-12">
           <Link
-            href="/"
+            href="/courses-list"
             prefetch={false}
             className="text-white mb-8 flex items-center hover:text-primary transition-colors w-fit"
           >
@@ -259,7 +259,7 @@ if (isEnrolled && user?.id && course.finalQuizId) {
             </div>
 
              
-              <div className="space-y-3 mt-6">
+              <div className="space-y-3 my-6">
                 <h3 className="font-semibold text-lg">Курстың тіркемелері
                 </h3>
                 {course.attachments.length === 0 && (
@@ -268,7 +268,9 @@ if (isEnrolled && user?.id && course.finalQuizId) {
                 {course.attachments.map((attachment) => (
                   <a
                     key={attachment.id}
-                    href={`/api/courses/${course.id}/attachments/${attachment.id}`}
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center w-full p-3 border rounded-sm border-sky-200 text-sky-700 hover:bg-sky-50 transition"
                   >
                     <File className="flex-shrink-0 w-4 h-4 mr-2" />
