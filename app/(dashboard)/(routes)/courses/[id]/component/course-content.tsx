@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+// import { toast } from "sonner"; 
+import toast from "react-hot-toast";// если используете другую lib — замените
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface Lesson {
@@ -26,16 +28,29 @@ interface Course {
   description?: string | null;
   modules?: Module[];
 }
-    
 
-export function CourseContent({ course }: { course: Course }) {
+interface CourseContentProps {
+  course: Course;
+  isEnrolled: boolean;
+}
+
+export function CourseContent({ course, isEnrolled }: CourseContentProps) {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
+  const router = useRouter();
 
   const toggleModule = (moduleId: string) => {
     setOpenModules((prev) => ({
       ...prev,
       [moduleId]: !prev[moduleId],
     }));
+  };
+
+  const handleLessonClick = (lessonId: string) => {
+    if (isEnrolled) {
+      router.push(`/dashboard/courses/${course.id}/lessons/${lessonId}`);
+    } else {
+      toast.error("Сабақты көру үшін алдымен курсқа жазылыңыз.");
+    }
   };
 
   return (
@@ -76,12 +91,12 @@ export function CourseContent({ course }: { course: Course }) {
                         <ul className="space-y-1 border-l border-border pl-3">
                           {chapter.lessons?.map((lesson) => (
                             <li key={lesson.id}>
-                              <Link
-                                href={`/dashboard/courses/${course.id}/lessons/${lesson.id}`}
+                              <button
+                                onClick={() => handleLessonClick(lesson.id)}
                                 className="text-sm text-primary hover:underline transition"
                               >
                                 {lesson.title}
-                              </Link>
+                              </button>
                             </li>
                           ))}
                         </ul>

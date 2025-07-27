@@ -175,7 +175,7 @@ if (isEnrolled && user?.id && course.finalQuizId) {
           
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-          <CourseContent course={course} />
+          <CourseContent course={course} isEnrolled={isEnrolled} />
 
 
 
