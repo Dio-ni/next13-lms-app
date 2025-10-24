@@ -49,7 +49,7 @@ export function CourseContent({ course, isEnrolled }: CourseContentProps) {
     if (isEnrolled) {
       router.push(`/dashboard/courses/${course.id}/lessons/${lessonId}`);
     } else {
-      toast.error("Сабақты көру үшін алдымен курсқа жазылыңыз.");
+      toast.error("Сабақты көру үшін алдымен курсқа тіркелініз.");
     }
   };
 

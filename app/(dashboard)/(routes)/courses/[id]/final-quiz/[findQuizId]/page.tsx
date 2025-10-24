@@ -246,7 +246,7 @@ const handleResetConfirm = () => {
           </p>
         </div>
       ) : (
-        <Button onClick={handleSubmit}>Завершить тест</Button>
+        <Button onClick={handleSubmit}>Аяқтау</Button>
       )}
       {submitted && (
         <div className="mt-6 space-y-4">

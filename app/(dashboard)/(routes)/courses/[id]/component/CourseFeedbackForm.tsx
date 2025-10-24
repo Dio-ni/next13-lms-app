@@ -47,7 +47,7 @@ export function CourseFeedbackForm({ courseId }: { courseId: string }) {
 
 
   return (
-    <div className="border rounded-lg p-6 space-y-6 bg-background">
+    <div className="border w-full mt-16 rounded-lg p-6 space-y-6 bg-background">
       <h2 className="text-2xl font-bold">Сауалнама</h2>
       <div className="space-y-2">
         <label className="font-medium">1. Сіздің лауазымыңыз</label>

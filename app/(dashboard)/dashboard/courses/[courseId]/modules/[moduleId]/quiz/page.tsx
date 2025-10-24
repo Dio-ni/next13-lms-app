@@ -184,7 +184,7 @@ export default function QuizTakingPage({
           {alreadySubmitted && <p className="text-sm text-gray-500 mt-2">Сіз бұл тестті бұрын тапсырдыңыз.</p>}
         </div>
       ) : (
-        <Button onClick={handleSubmit}>Завершить тест</Button>
+        <Button onClick={handleSubmit}>Аяқтау</Button>
       )}
     </div>
   );

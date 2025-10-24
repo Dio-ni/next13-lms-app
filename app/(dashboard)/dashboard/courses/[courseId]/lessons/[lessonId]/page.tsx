@@ -53,22 +53,23 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
             {/* Image Section */}
             {lesson.imageUrl && (
-              <div className="relative mt-2 aspect-video">
-                {/* {isImageLoading && <LoadingSpinner />} Show spinner while image is loading */}
+              <div className="mt-2 w-full">
                 <Image
                   alt="Lesson image"
-                  fill
-                  className="object-cover rounded-md"
                   src={lesson.imageUrl}
-                  // onLoadingComplete={handleImageLoad} // Trigger the load complete handler
+                  width={1200}        // можно указать примерную ширину
+                  height={800}        // высота подберётся пропорционально
+                  className="w-full h-auto rounded-md"
                 />
               </div>
+
+
             )}
 
             {/* Lesson Content */}
             {lesson.content && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Lesson Notes</h2>
+                <h2 className="text-xl font-semibold mb-4">Сабақ жазбалары</h2>
                 <div className="prose prose-blue dark:prose-invert max-w-none">
                   <Preview value={lesson.content} />
                 </div>

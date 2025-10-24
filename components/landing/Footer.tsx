@@ -65,8 +65,8 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Байланыс</h4>
             <div className="space-y-2 text-gray-400">
-              <p>Email: info@coursespark.kz</p>
-              <p>Телефон: +7 (707) 123 45 67</p>
+              <p>Email: ustazokytu@gmail.com</p>
+              <p>Телефон: +7 (702) 554 23 92</p>
               <p>Қазақстан, Алматы</p>
             </div>
           </div>

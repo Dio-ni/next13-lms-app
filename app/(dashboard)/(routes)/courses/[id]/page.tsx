@@ -200,7 +200,7 @@ if (isEnrolled && user?.id && course.finalQuizId) {
               <p className="text-muted-foreground text-sm">Автор табылмады</p>
             )}
             {course.finalQuiz && (
-                <div className="rounded-lg border border-border p-4 bg-muted/5 mt-8">
+                <div className="rounded-lg border border-border p-4 bg-muted/5 mt-16">
                   <h3 className="text-xl font-semibold mb-4 text-primary">
                     🏁 Финалдық тест
                   </h3>
@@ -208,7 +208,7 @@ if (isEnrolled && user?.id && course.finalQuizId) {
                     href={`/courses/${course.id}/final-quiz/${course.finalQuizId}`}
                     className="inline-block bg-primary text-white font-semibold py-2 px-4 rounded hover:bg-primary/90 transition"
                   >
-                    📝 Финалдық тестті өту
+                    📝 тестті өту
                   </Link>
                 </div>
               )}
@@ -216,9 +216,11 @@ if (isEnrolled && user?.id && course.finalQuizId) {
             {/* Certificate download (only if user is enrolled & has ≥ 80% progress) */}
             {/* Certificate Section */}
             <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Сертификат</h2>
+              {/* Certificate Section */}
+              <div className="mt-8">
+                <h2 className="text-xl font-bold mb-4">Сертификат</h2>
 
-              {!isEnrolled ? (
+                {!isEnrolled ? (
                   <p className="text-sm text-muted-foreground">
                     Сертификат алу үшін алдымен курсқа тіркеліңіз және оны кемінде 80% аяқтаңыз.
                   </p>
@@ -228,12 +230,25 @@ if (isEnrolled && user?.id && course.finalQuizId) {
                   </p>
                 ) : progress === null ? (
                   <p className="text-sm text-muted-foreground">
-                    Прогресс анықталмады. Сертификат алу үшін кемінде 80% курсты аяқтауыңыз қажет және финалдық тесттен кемінде 80% жинаңыз.
+                    Прогресс анықталмады. Сертификат алу үшін кемінде 80% курсты аяқтауыңыз қажет.
                   </p>
                 ) : progress < 80 ? (
                   <p className="text-sm text-muted-foreground">
-                    Сертификат алу үшін курсты кемінде 80% аяқтаңыз және финалдық тесттен кемінде 80% жинаңыз. Сіздің прогрессіңіз: {progress}%.
+                    Сертификат алу үшін курсты кемінде 80% аяқтаңыз. Сіздің прогрессіңіз: {progress}%.
                   </p>
+                ) : !course.finalQuizId ? (
+                  // ✅ Если финального теста нет, выдаём сразу
+                  <form
+                    action={`/api/courses/${course.id}/certificate/generateCertificate`}
+                    method="POST"
+                  >
+                    <button
+                      type="submit"
+                      className="mt-4 w-full bg-primary text-white py-2 px-4 rounded hover:bg-primary/90 transition"
+                    >
+                      Сертификатты жүктеу
+                    </button>
+                  </form>
                 ) : finalExamScore === null ? (
                   <p className="text-sm text-muted-foreground">
                     Финалдық тест нәтижесі табылмады. Сертификат алу үшін финалдық тестті тапсырыңыз.
@@ -255,6 +270,8 @@ if (isEnrolled && user?.id && course.finalQuizId) {
                     </button>
                   </form>
                 )}
+              </div>
+
 
             </div>
 
@@ -280,11 +297,13 @@ if (isEnrolled && user?.id && course.finalQuizId) {
                   
                 ))}
               </div>
-              <CourseFeedbackForm courseId={course.id} />
+              
 
             </div>
           </div>
+          
         </div>
+        <CourseFeedbackForm courseId={course.id} />
       </div>
     </div>
     

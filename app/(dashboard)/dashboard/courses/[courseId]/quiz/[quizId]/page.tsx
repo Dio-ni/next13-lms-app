@@ -196,7 +196,7 @@ export default function QuizTakingPage({
           )}
         </div>
       ) : (
-        <Button onClick={handleSubmit}>Завершить тест</Button>
+        <Button onClick={handleSubmit}>Аяқтау</Button>
       )}
     </div>
   );
